@@ -10,7 +10,7 @@ Image service that can serve optimized images based on predefined properties.
 - Incoming request from clients to application servers with load balancer in front.
 - Application servers host the image service.
 - Image server connects with Database servers, to store images metadata, with load balancer in front.
-- Image server connects with S3 storage service in AWS to store images. 
+- Image server connects with S3 storage service in AWS to store images.
 - NoSql to save images metadata. Data sharding with a partitioning scheme based on imageId.
 
 ### Improvements

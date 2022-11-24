@@ -8,7 +8,6 @@
 		<version>3.0.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-
 	<groupId>com.db.assignment</groupId>
 	<artifactId>image-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -17,7 +16,6 @@
 	<properties>
 		<java.version>11</java.version>
 	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
