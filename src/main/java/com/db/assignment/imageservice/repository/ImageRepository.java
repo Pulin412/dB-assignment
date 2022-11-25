@@ -13,8 +13,9 @@ public class ImageRepository {
         return null;
     }
 
-    public String getOptimisedImage(ImageRequestDto imageRequestDto) {
+    public String getOptimisedImageFromS3(ImageRequestDto imageRequestDto) throws Exception {
         return null;
+//        throw new Exception();
     }
 
     public String getOriginalImageFromS3(ImageRequestDto imageRequestDto) {
@@ -26,6 +27,7 @@ public class ImageRepository {
     }
 
     public String compressAndSave(String s3_original_url, ImageRequestDto imageRequestDto) throws IOException {
-        return null;
+        throw new IOException();
+//        return null;
     }
 }

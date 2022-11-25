@@ -18,3 +18,4 @@ Image service that can serve optimized images based on predefined properties.
 - Key generation service to generate image IDs for sharded database.
 - Introduce a _Least Recently Used_ based Memcached cache with 80-20% rule i.e. 20% of daily read volume is generating 80% of the incoming traffic.
 - Isolate reads with writes.
+- replace spring retry with queues.

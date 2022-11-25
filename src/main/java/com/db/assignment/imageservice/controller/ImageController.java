@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/image")
 public class ImageController {
@@ -25,7 +27,7 @@ public class ImageController {
     @GetMapping(value = "/show/{preDefinedType}/{seo}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ImageResponseDto> fetchImage(@PathVariable String preDefinedType,
                                                        @PathVariable(required = false) String seo,
-                                                       @RequestParam("reference") String reference) {
+                                                       @RequestParam("reference") String reference) throws IOException {
         return new ResponseEntity<>(
                 imageService.getImage(
                         ImageRequestDto.builder()

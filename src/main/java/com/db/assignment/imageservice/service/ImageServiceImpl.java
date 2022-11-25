@@ -7,9 +7,13 @@ import com.db.assignment.imageservice.repository.ImageRepository;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 @Service
 public class ImageServiceImpl implements ImageService{
@@ -22,14 +26,17 @@ public class ImageServiceImpl implements ImageService{
     }
 
     @Override
-    public ImageResponseDto getImage(ImageRequestDto imageRequestDto) {
+    @Retryable(value = IOException.class, maxAttemptsExpression = "${retry.maxAttempts}",
+            backoff = @Backoff(delayExpression = "${retry.maxDelay}"),
+            listeners = {"defaultListenerSupport"})
+    public ImageResponseDto getImage(ImageRequestDto imageRequestDto) throws IOException {
 
         validate(imageRequestDto);
         String s3_Optimised_Url = "";
         String s3_Original_Url = "";
 
         try {
-            s3_Optimised_Url = imageRepository.getOptimisedImage(imageRequestDto);
+            s3_Optimised_Url = imageRepository.getOptimisedImageFromS3(imageRequestDto);
 
             if(Strings.isNotEmpty(s3_Optimised_Url)){
                 return ImageResponseDto.builder()
@@ -44,15 +51,15 @@ public class ImageServiceImpl implements ImageService{
                 s3_Original_Url = imageRepository.getOriginalImageFromSource(imageRequestDto);
             }
 
-            // compress image and store in s3
-            s3_Optimised_Url = imageRepository.compressAndSave(s3_Original_Url, imageRequestDto);
-
-        } catch (IOException ex){
-            log.warn("IMAGE_SERVICE ::::: Issue in connecting with external systems");
-
         } catch (Exception ex){
-            log.error("IMAGE_SERVICE ::::: Issue in connecting with external systems");
+            log.error("IMAGE_SERVICE ::::: System issues, Image not found");
+            throw new ImageNotFoundException("System issues, Image not found");
         }
+
+        // compress image and store in s3
+        s3_Optimised_Url = imageRepository.compressAndSave(s3_Original_Url, imageRequestDto);
+        if(Strings.isEmpty(s3_Optimised_Url))
+            log.warn("IMAGE_SERVICE ::::: Issue in connecting with external systems, retrying..");
 
         return ImageResponseDto.builder()
                 .s3BucketUrl(s3_Optimised_Url)
@@ -73,8 +80,15 @@ public class ImageServiceImpl implements ImageService{
         }
 
         //TODO  reference not exists
-        if(imageRequestDto.getReference() == null)
+        if(imageRequestDto.getReference() == null) {
             log.info("IMAGE_SERVICE ::::: " + imageRequestDto.getReference() + " not valid");
             throw new ImageNotFoundException("Reference not found");
+        }
+    }
+
+    @Recover
+    public ImageResponseDto recover(IOException e, ImageRequestDto imageRequestDto){
+        log.error("IMAGE_SERVICE ::::: Issue in connecting with external systems, quitting..");
+        return ImageResponseDto.builder().build();
     }
 }
