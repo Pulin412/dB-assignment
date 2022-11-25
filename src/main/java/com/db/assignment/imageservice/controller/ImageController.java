@@ -11,7 +11,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/image")
 public class ImageController {
 
-    private ImageService imageService;
+    private final ImageService imageService;
+
+    public ImageController(ImageService imageService) {
+        this.imageService = imageService;
+    }
 
     @GetMapping(value = "/show/{preDefinedType}/{seo}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ImageResponseDto> fetchImage(@PathVariable String preDefinedType, @PathVariable(required = false) String seo, @RequestParam("reference") String reference){
