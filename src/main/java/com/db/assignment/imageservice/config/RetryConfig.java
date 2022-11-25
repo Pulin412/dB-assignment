@@ -1,6 +1,5 @@
 package com.db.assignment.imageservice.config;
 
-import com.db.assignment.imageservice.service.DefaultListenerSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;

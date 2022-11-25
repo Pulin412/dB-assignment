@@ -3,7 +3,6 @@ package com.db.assignment.imageservice.controller;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
 import com.db.assignment.imageservice.service.ImageService;
-import com.db.assignment.imageservice.service.ImageServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,7 @@ import java.io.IOException;
 public class ImageController {
 
     private final ImageService imageService;
-    private Logger log = LoggerFactory.getLogger(ImageController.class);
+    private final Logger log = LoggerFactory.getLogger(ImageController.class);
 
     public ImageController(ImageService imageService) {
         this.imageService = imageService;

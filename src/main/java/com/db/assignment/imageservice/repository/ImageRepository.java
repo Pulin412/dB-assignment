@@ -1,10 +1,9 @@
 package com.db.assignment.imageservice.repository;
 
+import com.db.assignment.imageservice.exception.CustomS3Exception;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
 import org.springframework.stereotype.Repository;
-
-import java.io.IOException;
 
 @Repository
 public class ImageRepository {
@@ -26,8 +25,8 @@ public class ImageRepository {
         return null;
     }
 
-    public String compressAndSave(String s3_original_url, ImageRequestDto imageRequestDto) throws IOException {
-        throw new IOException();
-//        return null;
+    public String compressAndSave(String s3_original_url, ImageRequestDto imageRequestDto) throws CustomS3Exception {
+        throw new CustomS3Exception("error");
+//        return "saved";
     }
 }

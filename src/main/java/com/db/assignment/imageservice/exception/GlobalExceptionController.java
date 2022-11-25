@@ -20,4 +20,14 @@ public class GlobalExceptionController {
                 LocalDateTime.now(),
                 ex.getMessage());
     }
+
+    @ExceptionHandler(CustomS3Exception.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    public ErrorMessage customException(CustomS3Exception ex, WebRequest request) {
+
+        return new ErrorMessage(
+                HttpStatus.NOT_FOUND,
+                LocalDateTime.now(),
+                ex.getMessage());
+    }
 }
