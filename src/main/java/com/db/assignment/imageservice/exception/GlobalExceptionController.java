@@ -26,7 +26,7 @@ public class GlobalExceptionController {
     public ErrorMessage customException(CustomS3Exception ex, WebRequest request) {
 
         return new ErrorMessage(
-                HttpStatus.NOT_FOUND,
+                HttpStatus.SERVICE_UNAVAILABLE,
                 LocalDateTime.now(),
                 ex.getMessage());
     }
@@ -36,7 +36,7 @@ public class GlobalExceptionController {
     public ErrorMessage genericException(GenericException ex, WebRequest request) {
 
         return new ErrorMessage(
-                HttpStatus.NOT_FOUND,
+                HttpStatus.NOT_ACCEPTABLE,
                 LocalDateTime.now(),
                 ex.getMessage());
     }

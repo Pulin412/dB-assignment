@@ -35,14 +35,16 @@ public class ImageServiceImpl implements ImageService{
     private final ThumbnailConfig thumbnailConfig;
     private final PortraitConfig portraitConfig;
     private final DetailLargeConfig detailLargeConfig;
+    private final ImageTypeResolver imageTypeResolver;
     private final Logger log = LoggerFactory.getLogger(ImageServiceImpl.class);
 
-    public ImageServiceImpl(S3StoreInterface s3StoreInterface, SourceStoreInterface sourceStoreInterface, ThumbnailConfig thumbnailConfig, PortraitConfig portraitConfig, DetailLargeConfig detailLargeConfig) {
+    public ImageServiceImpl(S3StoreInterface s3StoreInterface, SourceStoreInterface sourceStoreInterface, ThumbnailConfig thumbnailConfig, PortraitConfig portraitConfig, DetailLargeConfig detailLargeConfig, ImageTypeResolver imageTypeResolver) {
         this.s3StoreInterface = s3StoreInterface;
         this.sourceStoreInterface = sourceStoreInterface;
         this.thumbnailConfig = thumbnailConfig;
         this.portraitConfig = portraitConfig;
         this.detailLargeConfig = detailLargeConfig;
+        this.imageTypeResolver = imageTypeResolver;
     }
 
     @Override
@@ -196,6 +198,6 @@ public class ImageServiceImpl implements ImageService{
     }
 
     private ImageType createImageType(ImageRequestDto imageRequestDto, String imageType){
-        return ImageServiceUtils.createImageType(imageRequestDto, imageType, thumbnailConfig, detailLargeConfig, portraitConfig);
+        return imageTypeResolver.createImageType(imageRequestDto, imageType, thumbnailConfig, detailLargeConfig, portraitConfig);
     }
 }
