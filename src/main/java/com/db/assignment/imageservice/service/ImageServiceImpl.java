@@ -53,53 +53,58 @@ public class ImageServiceImpl implements ImageService{
         validate(imageRequestDto);
         log.info("IMAGE_SERVICE ::::: show ::::: validate ::::: Incoming request validated");
 
-        String s3_Optimised_Url = "";
-        String s3_Original_Url = "";
-        String s3OriginalImageUrl = "";
+        String optimised_Object_From_S3_Url = "";
+        String s3_Optimised_Url ="";
+        String original_Object_Url = "";
 
         try {
             // 2. Create the S3 URL to access/store the optimised image
-            String s3Url = ImageServiceUtils.createS3Url(imageRequestDto);
-            log.info("IMAGE_SERVICE ::::: show ::::: Fetching Compressed Image from S3 located at - " + s3Url);
+            String object_For_S3_Url = ImageServiceUtils.createS3Url(imageRequestDto);
+            log.info("IMAGE_SERVICE ::::: show ::::: Fetching Compressed Image from S3 located at - " + object_For_S3_Url);
 
             //3. Get the optimised image from S3 using the URL created at step 2
-            s3_Optimised_Url = imageRepository.getOptimisedImageFromS3(s3Url);
+            optimised_Object_From_S3_Url = imageRepository.getOptimisedImageFromS3(object_For_S3_Url);
 
             // 3a. Optimised image IS present, create and send the response to client
-            if(Strings.isNotEmpty(s3_Optimised_Url)){
-                log.info("IMAGE_SERVICE ::::: show ::::: Found compressed Image at [" + s3_Optimised_Url + "]... Returning to client");
+            if(Strings.isNotEmpty(optimised_Object_From_S3_Url)){
+                log.info("IMAGE_SERVICE ::::: show ::::: Found compressed Image at [" + optimised_Object_From_S3_Url + "]... Returning to client");
                 return ImageResponseDto.builder()
-                        .s3BucketUrl(s3_Optimised_Url)
+                        .s3BucketUrl(optimised_Object_From_S3_Url)
                         .build();
             }
 
             // 3b. Optimised image IS NOT present
             // 4. Get the original image from S3 using the same URL created in step 2
-            s3OriginalImageUrl = ImageServiceUtils.getOriginalImageURL(s3Url);
-            log.info("IMAGE_SERVICE ::::: show ::::: Compressed Image not Present in S3, checking Original Image in S3 at - " + s3OriginalImageUrl);
-            s3_Original_Url = imageRepository.getOriginalImageFromS3(s3OriginalImageUrl);
+            String original_Object_For_S3_Url = ImageServiceUtils.getOriginalImageURL(object_For_S3_Url);
+            log.info("IMAGE_SERVICE ::::: show ::::: Compressed Image not Present in S3, checking Original Image in S3 at - " + original_Object_For_S3_Url);
+            original_Object_Url = imageRepository.getOriginalImageFromS3(original_Object_For_S3_Url);
 
             // 4a. Original image IS NOT present in S3, download image from the source
-            if(Strings.isEmpty(s3_Original_Url)){
+            if(Strings.isEmpty(original_Object_Url)){
                 log.info("IMAGE_SERVICE ::::: show ::::: Original Image not found in S3, fetching from the source");
-                s3_Original_Url = imageRepository.getOriginalImageFromSource(imageRequestDto);
-                if(Strings.isNotEmpty(s3_Original_Url))
-                    log.info("IMAGE_SERVICE ::::: show ::::: Found Original Image at source located at - " + s3_Original_Url);
+                original_Object_Url = imageRepository.getOriginalImageFromSource(imageRequestDto);
+                if(Strings.isNotEmpty(original_Object_Url))
+                    log.info("IMAGE_SERVICE ::::: show ::::: Found Original Image at source located at - " + original_Object_Url);
                 else {
                     log.error("IMAGE_SERVICE ::::: show ::::: Unable to find Original Image at source.");
                     throw new ImageNotFoundException("System issues, Image not found. Try again later");
                 }
             }else {
-                log.info("IMAGE_SERVICE ::::: show ::::: Found Original Image in S3 at - " + s3_Original_Url);
+                log.info("IMAGE_SERVICE ::::: show ::::: Found Original Image in S3 at - " + original_Object_Url);
             }
+
+            //5. Optimise the fetched image from the source/s3
+            log.info("IMAGE_SERVICE ::::: show ::::: Compressing the Original Image - " + original_Object_Url);
+            s3_Optimised_Url = imageRepository.optimise(original_Object_Url, imageRequestDto);
+
         } catch (Exception ex){
             log.error("IMAGE_SERVICE ::::: show ::::: System issues, Image not found. Try again later");
             throw new ImageNotFoundException("System issues, Image not found. Try again later");
         }
 
         //5. Optimise the fetched image from the source and store in s3 storage.
-        log.info("IMAGE_SERVICE ::::: show ::::: Compressing and Saving Original Image in S3 at - " + s3OriginalImageUrl);
-        s3_Optimised_Url = imageRepository.compressAndSave(s3_Original_Url, imageRequestDto);
+        log.info("IMAGE_SERVICE ::::: show ::::: Saving Original Image in S3 at - " + s3_Optimised_Url);
+        s3_Optimised_Url = imageRepository.save(s3_Optimised_Url, imageRequestDto);
 
         //6. Return the same optimised image back to the client.
         log.info("IMAGE_SERVICE ::::: show ::::: Compressed image saved successfully, returning to the client");
