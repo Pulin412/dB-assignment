@@ -1,4 +1,4 @@
-package com.db.assignment.imageservice.service;
+package com.db.assignment.imageservice.service.imageTypeStrategy;
 
 import com.db.assignment.imageservice.config.ImageTypes.PortraitConfig;
 import com.db.assignment.imageservice.model.enums.ImageTypeStrategyNameEnum;

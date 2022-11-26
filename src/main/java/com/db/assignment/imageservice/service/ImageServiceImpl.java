@@ -10,6 +10,8 @@ import com.db.assignment.imageservice.model.enums.ImageTypeStrategyNameEnum;
 import com.db.assignment.imageservice.model.imageType.ImageType;
 import com.db.assignment.imageservice.repository.S3StoreInterface;
 import com.db.assignment.imageservice.repository.SourceStoreInterface;
+import com.db.assignment.imageservice.service.imageTypeStrategy.ImageTypeStrategy;
+import com.db.assignment.imageservice.service.imageTypeStrategy.ImageTypeStrategyFactory;
 import com.db.assignment.imageservice.utils.ImageServiceConstants;
 import com.db.assignment.imageservice.utils.ImageServiceUtils;
 import org.apache.logging.log4j.util.Strings;
