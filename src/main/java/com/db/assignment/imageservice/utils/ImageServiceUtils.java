@@ -54,6 +54,11 @@ public class ImageServiceUtils {
         return sb.toString();
     }
 
+    public static String getOriginalImageURL(String s3Url) {
+        String[] arr = s3Url.split("/");
+        String preDefType = arr[1];
+        return s3Url.replace(preDefType, "original");
+    }
 
     public static ImageType createImageType(ImageRequestDto imageRequestDto, String imageType, ThumbnailConfig thumbnailConfig, DetailLargeConfig detailLargeConfig, PortraitConfig portraitConfig) {
         if(imageType.equalsIgnoreCase("thumbnail"))

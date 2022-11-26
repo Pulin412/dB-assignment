@@ -67,6 +67,8 @@ public class ImageServiceImpl implements ImageService{
 
             // 3b. Optimised image IS NOT present
             // 4. Get the original image from S3 using the same URL created in step 2
+            String s3OriginalUrl = ImageServiceUtils.getOriginalImageURL(s3Url);
+            System.out.println(s3OriginalUrl);
             s3_Original_Url = imageRepository.getOriginalImageFromS3(s3Url);
 
             // 4a. Original image IS NOT present in S3, download image from the source
