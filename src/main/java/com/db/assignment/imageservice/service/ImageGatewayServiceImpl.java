@@ -1,4 +1,4 @@
-package com.db.assignment.imageservice.externalGateway;
+package com.db.assignment.imageservice.service;
 
 import com.db.assignment.imageservice.model.ExternalImageResponseDto;
 import com.db.assignment.imageservice.model.ExternalImageDto;

@@ -8,8 +8,8 @@ import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
 import com.db.assignment.imageservice.model.enums.ImageTypeStrategyNameEnum;
 import com.db.assignment.imageservice.model.imageType.ImageType;
-import com.db.assignment.imageservice.repository.S3StoreInterface;
-import com.db.assignment.imageservice.repository.SourceStoreInterface;
+import com.db.assignment.imageservice.repository.S3StoreRepo;
+import com.db.assignment.imageservice.repository.SourceStoreRepo;
 import com.db.assignment.imageservice.service.imageTypeStrategy.ImageTypeStrategy;
 import com.db.assignment.imageservice.service.imageTypeStrategy.ImageTypeStrategyFactory;
 import com.db.assignment.imageservice.utils.ImageServiceConstants;
@@ -28,15 +28,15 @@ import java.util.Optional;
 @Service
 public class ImageServiceImpl implements ImageService{
 
-    private final S3StoreInterface s3StoreInterface;
-    private final SourceStoreInterface sourceStoreInterface;
+    private final S3StoreRepo s3StoreRepo;
+    private final SourceStoreRepo sourceStoreRepo;
     private final S3OperationService s3OperationService;
     private final ImageTypeStrategyFactory imageTypeStrategyFactory;
     private final Logger log = LoggerFactory.getLogger(ImageServiceImpl.class);
 
-    public ImageServiceImpl(S3StoreInterface s3StoreInterface, SourceStoreInterface sourceStoreInterface, S3OperationService s3OperationService, ImageTypeStrategyFactory imageTypeStrategyFactory) {
-        this.s3StoreInterface = s3StoreInterface;
-        this.sourceStoreInterface = sourceStoreInterface;
+    public ImageServiceImpl(S3StoreRepo s3StoreRepo, SourceStoreRepo sourceStoreRepo, S3OperationService s3OperationService, ImageTypeStrategyFactory imageTypeStrategyFactory) {
+        this.s3StoreRepo = s3StoreRepo;
+        this.sourceStoreRepo = sourceStoreRepo;
         this.s3OperationService = s3OperationService;
         this.imageTypeStrategyFactory = imageTypeStrategyFactory;
     }
@@ -61,7 +61,7 @@ public class ImageServiceImpl implements ImageService{
             log.debug("IMAGE_SERVICE ::::: show ::::: Fetching Compressed Image {} from S3 located at - {} ", imageRequestDto.getImageMetaData().getImageId(), object_For_S3_Url);
 
             //3. Get the optimised image from S3 using the URL created at step 2
-            optimised_Object_From_S3_Url = s3StoreInterface.getOptimisedImageFromS3(ExternalImageDto.builder().s3ObjectUrl(object_For_S3_Url).build());
+            optimised_Object_From_S3_Url = s3StoreRepo.getOptimisedImageFromS3(ExternalImageDto.builder().s3ObjectUrl(object_For_S3_Url).build());
 
             // 3a. Optimised image IS present, create and send the response to client
             if(Strings.isNotEmpty(optimised_Object_From_S3_Url)){
@@ -75,12 +75,12 @@ public class ImageServiceImpl implements ImageService{
             // 4. Get the original image from S3 using the same URL created in step 2
             String original_Object_For_S3_Url = s3OperationService.getOriginalImageURL(object_For_S3_Url);
             log.debug("IMAGE_SERVICE ::::: show ::::: Compressed Image {} not Present in S3, checking Original Image in S3 at {}", imageRequestDto.getImageMetaData().getImageId(), original_Object_For_S3_Url);
-            original_Object_Url = s3StoreInterface.getOriginalImageFromS3(ExternalImageDto.builder().s3ObjectUrl(original_Object_For_S3_Url).build());
+            original_Object_Url = s3StoreRepo.getOriginalImageFromS3(ExternalImageDto.builder().s3ObjectUrl(original_Object_For_S3_Url).build());
 
             // 4a. Original image IS NOT present in S3, download image from the source
             if(Strings.isEmpty(original_Object_Url)){
                 log.debug("IMAGE_SERVICE ::::: show ::::: Original Image {} not found in S3, fetching from the source", imageRequestDto.getImageMetaData().getImageId());
-                original_Object_Url = sourceStoreInterface.getOriginalImageFromSource(ExternalImageDto.builder().imageRequestDto(imageRequestDto).build());
+                original_Object_Url = sourceStoreRepo.getOriginalImageFromSource(ExternalImageDto.builder().imageRequestDto(imageRequestDto).build());
                 if(Strings.isNotEmpty(original_Object_Url))
                     log.debug("IMAGE_SERVICE ::::: show ::::: Found Original Image {} at source located at {} ", imageRequestDto.getImageMetaData().getImageId(), original_Object_Url);
                 else {
@@ -93,7 +93,7 @@ public class ImageServiceImpl implements ImageService{
 
             //5. Optimise the fetched image from the source/s3
             log.debug("IMAGE_SERVICE ::::: show ::::: Compressing the Original Image {} ", original_Object_Url);
-            s3_Optimised_Url = s3StoreInterface.optimise(ExternalImageDto.builder().s3ObjectUrl(original_Object_Url).imageRequestDto(imageRequestDto).build());
+            s3_Optimised_Url = s3StoreRepo.optimise(ExternalImageDto.builder().s3ObjectUrl(original_Object_Url).imageRequestDto(imageRequestDto).build());
 
         } catch (Exception ex){
             log.error("IMAGE_SERVICE ::::: show ::::: System issues, Image not found. Try again later");
@@ -102,7 +102,7 @@ public class ImageServiceImpl implements ImageService{
 
         //5. Optimise the fetched image from the source and store in s3 storage.
         log.debug("IMAGE_SERVICE ::::: show ::::: Saving Original Image {} in S3 at {} ", imageRequestDto.getImageMetaData().getImageId(), s3_Optimised_Url);
-        s3_Optimised_Url = s3StoreInterface.save(ExternalImageDto.builder().s3ObjectUrl(s3_Optimised_Url).imageRequestDto(imageRequestDto).build());
+        s3_Optimised_Url = s3StoreRepo.save(ExternalImageDto.builder().s3ObjectUrl(s3_Optimised_Url).imageRequestDto(imageRequestDto).build());
 
         //6. Return the same optimised image back to the client.
         log.info("IMAGE_SERVICE ::::: show ::::: Compressed image {} saved successfully, returning to the client", imageRequestDto.getImageMetaData().getImageId());
@@ -136,18 +136,18 @@ public class ImageServiceImpl implements ImageService{
         try{
             if(!preDefinedType.equalsIgnoreCase("original")){
                 log.debug("IMAGE_SERVICE ::::: flush ::::: Flushing compressed image with preDefinedType {}", preDefinedType);
-                return s3StoreInterface.flushImage(ExternalImageDto.builder().s3ObjectUrl(imagePath).build());
+                return s3StoreRepo.flushImage(ExternalImageDto.builder().s3ObjectUrl(imagePath).build());
             } else {
                 log.debug("IMAGE_SERVICE ::::: flush ::::: Finding all optimised images");
                 // 1. List all buckets
-                List<String> buckets = s3StoreInterface.getBuckets();
+                List<String> buckets = s3StoreRepo.getBuckets();
 
                 // 2. Iterate through all buckets and search for created file Name as per AWS S3 directory strategy
                 // 3. Delete the contents if match is present during iteration
                 for (String bucket : buckets) {
                     log.debug("IMAGE_SERVICE ::::: flush ::::: Finding the optimised images in bucket {}", bucket);
-                    if(s3StoreInterface.doesObjectExist(ExternalImageDto.builder().bucket(bucket).s3ObjectUrl(imagePath).build())) {
-                        s3StoreInterface.flushImage(ExternalImageDto.builder().s3ObjectUrl(imagePath).build());
+                    if(s3StoreRepo.doesObjectExist(ExternalImageDto.builder().bucket(bucket).s3ObjectUrl(imagePath).build())) {
+                        s3StoreRepo.flushImage(ExternalImageDto.builder().s3ObjectUrl(imagePath).build());
                         log.info("IMAGE_SERVICE ::::: flush ::::: Found optimised image {}, flushed", imagePath);
                     }
                 }

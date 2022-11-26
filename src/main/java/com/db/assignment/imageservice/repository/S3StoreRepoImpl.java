@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Repository
-public class S3StoreImpl implements S3StoreInterface{
+public class S3StoreRepoImpl implements S3StoreRepo {
 
     @Value("${com.dbf.s3-service}")
     private String mocked_externalS3;

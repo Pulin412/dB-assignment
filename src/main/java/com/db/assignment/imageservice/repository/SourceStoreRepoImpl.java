@@ -1,15 +1,15 @@
 package com.db.assignment.imageservice.repository;
 
-import com.db.assignment.imageservice.externalGateway.ImageGatewayService;
+import com.db.assignment.imageservice.service.ImageGatewayService;
 import com.db.assignment.imageservice.model.ExternalImageDto;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class SourceStoreImpl implements SourceStoreInterface{
+public class SourceStoreRepoImpl implements SourceStoreRepo {
 
     private final ImageGatewayService imageGatewayService;
 
-    public SourceStoreImpl(ImageGatewayService imageGatewayService) {
+    public SourceStoreRepoImpl(ImageGatewayService imageGatewayService) {
         this.imageGatewayService = imageGatewayService;
     }
 

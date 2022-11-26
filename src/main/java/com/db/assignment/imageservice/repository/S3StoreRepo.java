@@ -5,7 +5,7 @@ import com.db.assignment.imageservice.model.ExternalImageDto;
 
 import java.util.List;
 
-public interface S3StoreInterface {
+public interface S3StoreRepo {
 
     String getOptimisedImageFromS3(ExternalImageDto externalImageDto);
 
