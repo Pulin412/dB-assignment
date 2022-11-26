@@ -1,15 +1,12 @@
 package com.db.assignment.imageservice.service;
 
-import com.db.assignment.imageservice.config.ImageTypes.DetailLargeConfig;
-import com.db.assignment.imageservice.config.ImageTypes.PortraitConfig;
-import com.db.assignment.imageservice.config.ImageTypes.ThumbnailConfig;
 import com.db.assignment.imageservice.exception.CustomS3Exception;
 import com.db.assignment.imageservice.exception.GenericException;
 import com.db.assignment.imageservice.exception.ImageNotFoundException;
+import com.db.assignment.imageservice.model.ExternalImageDto;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
-import com.db.assignment.imageservice.model.ExternalImageDto;
-import com.db.assignment.imageservice.model.enums.PreDefImageTypesEnum;
+import com.db.assignment.imageservice.model.enums.ImageTypeStrategyNameEnum;
 import com.db.assignment.imageservice.model.imageType.ImageType;
 import com.db.assignment.imageservice.repository.S3StoreInterface;
 import com.db.assignment.imageservice.repository.SourceStoreInterface;
@@ -32,19 +29,14 @@ public class ImageServiceImpl implements ImageService{
 
     private final S3StoreInterface s3StoreInterface;
     private final SourceStoreInterface sourceStoreInterface;
-    private final ThumbnailConfig thumbnailConfig;
-    private final PortraitConfig portraitConfig;
-    private final DetailLargeConfig detailLargeConfig;
-    private final ImageTypeResolver imageTypeResolver;
+
+    private final ImageTypeStrategyFactory imageTypeStrategyFactory;
     private final Logger log = LoggerFactory.getLogger(ImageServiceImpl.class);
 
-    public ImageServiceImpl(S3StoreInterface s3StoreInterface, SourceStoreInterface sourceStoreInterface, ThumbnailConfig thumbnailConfig, PortraitConfig portraitConfig, DetailLargeConfig detailLargeConfig, ImageTypeResolver imageTypeResolver) {
+    public ImageServiceImpl(S3StoreInterface s3StoreInterface, SourceStoreInterface sourceStoreInterface, ImageTypeStrategyFactory imageTypeStrategyFactory) {
         this.s3StoreInterface = s3StoreInterface;
         this.sourceStoreInterface = sourceStoreInterface;
-        this.thumbnailConfig = thumbnailConfig;
-        this.portraitConfig = portraitConfig;
-        this.detailLargeConfig = detailLargeConfig;
-        this.imageTypeResolver = imageTypeResolver;
+        this.imageTypeStrategyFactory = imageTypeStrategyFactory;
     }
 
     @Override
@@ -167,7 +159,7 @@ public class ImageServiceImpl implements ImageService{
     }
 
     private void validateObject(String preDefinedType, String reference) {
-        Optional<PreDefImageTypesEnum> optionalMatch = Arrays.stream(PreDefImageTypesEnum.values())
+        Optional<ImageTypeStrategyNameEnum> optionalMatch = Arrays.stream(ImageTypeStrategyNameEnum.values())
                 .filter(val -> val.name().equalsIgnoreCase((preDefinedType)))
                 .findFirst();
 
@@ -187,7 +179,7 @@ public class ImageServiceImpl implements ImageService{
     private void validate(ImageRequestDto imageRequestDto){
 
         //validate and create preDefinedImageType object
-        imageRequestDto.setImageType(createImageType(imageRequestDto, imageRequestDto.getPreDefinedType()));
+        imageRequestDto.setImageType(createImageType(imageRequestDto.getPreDefinedType()));
         log.debug("IMAGE SERVICE :::::: validate :::::: Set predefined Image Type with details {} ", imageRequestDto.getImageType());
 
         //validate reference is present; add a regex to validate the pattern
@@ -197,7 +189,16 @@ public class ImageServiceImpl implements ImageService{
         }
     }
 
-    private ImageType createImageType(ImageRequestDto imageRequestDto, String imageType){
-        return imageTypeResolver.createImageType(imageRequestDto, imageType, thumbnailConfig, detailLargeConfig, portraitConfig);
+    private ImageType createImageType(String imageType){
+
+        try{
+            ImageTypeStrategy imageTypeStrategy = imageTypeStrategyFactory.findStrategy(ImageTypeStrategyNameEnum.valueOf(imageType.toUpperCase()));
+            if(imageTypeStrategy == null)
+                throw new Exception();
+            return imageTypeStrategy.getImageType();
+        } catch (Exception ex){
+            log.error("IMAGE_SERVICE ::::: Pre defined type {} not valid", imageType);
+            throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_INVALID_PRE_DEFINED_TYPE);
+        }
     }
 }

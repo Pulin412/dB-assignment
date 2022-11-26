@@ -2,6 +2,11 @@
 
 Image service that can serve optimized images based on predefined properties.
 
+## Patterns used
+- Factory and Strategy pattern for ImageTypes config.
+- Gateway pattern for external systems.
+- DTOs.
+
 ## NFRs
 - Image service needs to be highly available.
 - Image service should be highly reliable.
@@ -14,7 +19,7 @@ Image service that can serve optimized images based on predefined properties.
 - NoSql to save images metadata. Data sharding with a partitioning scheme based on imageId.
 
 ### Improvements
-- DynameDB (key value database)/ Cassandra DB (Distributed NoSql) to store images metadata.
+- DynamoDB (key value database)/ Cassandra DB (Distributed NoSql) to store images metadata.
 - Key generation service to generate image IDs for sharded database.
 - Introduce a _Least Recently Used_ based Memcached cache with 80-20% rule i.e. 20% of daily read volume is generating 80% of the incoming traffic.
 - Isolate reads with writes.

@@ -5,17 +5,6 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
     <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
 
-<!--    <springProfile name="dev">-->
-<!--        <logger name="com.db.assignment.imageservice" level="DEBUG" additivity="false">-->
-<!--            <appender-ref ref="CONSOLE" />-->
-<!--        </logger>-->
-<!--    </springProfile>-->
-<!--    <springProfile name="accp | prod">-->
-<!--        <logger name="guru.springframework.controllers" level="WARN" additivity="false">-->
-<!--            <appender-ref ref="FILE" />-->
-<!--        </logger>-->
-<!--    </springProfile>-->
-
     <appender name="Console"
               class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
