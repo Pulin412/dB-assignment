@@ -1,18 +1,21 @@
 package com.db.assignment.imageservice.repository;
 
-import com.db.assignment.imageservice.model.ImageRequestDto;
-import org.springframework.beans.factory.annotation.Value;
+import com.db.assignment.imageservice.externalGateway.ImageGatewayService;
+import com.db.assignment.imageservice.model.ImageDto;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class SourceStoreImpl implements SourceStoreInterface{
 
-    @Value("${mock.response.getOriginalImageFromSource}")
-    private String mock_response_getOriginalImageFromSource;
+    private final ImageGatewayService imageGatewayService;
+
+    public SourceStoreImpl(ImageGatewayService imageGatewayService) {
+        this.imageGatewayService = imageGatewayService;
+    }
 
     @Override
-    public String getOriginalImageFromSource(ImageRequestDto imageRequestDto) {
+    public String getOriginalImageFromSource(ImageDto imageDto) {
         // Call to the external system to fetch from source [mocked_external_source]
-        return mock_response_getOriginalImageFromSource;
+        return imageGatewayService.fetchImage(imageDto).getMockedResponse();
     }
 }

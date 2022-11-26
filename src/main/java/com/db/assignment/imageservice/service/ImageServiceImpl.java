@@ -7,7 +7,7 @@ import com.db.assignment.imageservice.exception.CustomS3Exception;
 import com.db.assignment.imageservice.exception.ImageNotFoundException;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
-import com.db.assignment.imageservice.model.S3ImageDto;
+import com.db.assignment.imageservice.model.ImageDto;
 import com.db.assignment.imageservice.model.enums.PreDefImageTypesEnum;
 import com.db.assignment.imageservice.model.imageType.ImageType;
 import com.db.assignment.imageservice.repository.S3StoreInterface;
@@ -64,7 +64,7 @@ public class ImageServiceImpl implements ImageService{
             log.debug("IMAGE_SERVICE ::::: show ::::: Fetching Compressed Image from S3 located at - {} ", object_For_S3_Url);
 
             //3. Get the optimised image from S3 using the URL created at step 2
-            optimised_Object_From_S3_Url = s3StoreInterface.getOptimisedImageFromS3(S3ImageDto.builder().s3ObjectUrl(object_For_S3_Url).build());
+            optimised_Object_From_S3_Url = s3StoreInterface.getOptimisedImageFromS3(ImageDto.builder().s3ObjectUrl(object_For_S3_Url).build());
 
             // 3a. Optimised image IS present, create and send the response to client
             if(Strings.isNotEmpty(optimised_Object_From_S3_Url)){
@@ -78,12 +78,12 @@ public class ImageServiceImpl implements ImageService{
             // 4. Get the original image from S3 using the same URL created in step 2
             String original_Object_For_S3_Url = ImageServiceUtils.getOriginalImageURL(object_For_S3_Url);
             log.debug("IMAGE_SERVICE ::::: show ::::: Compressed Image not Present in S3, checking Original Image in S3 at {}", original_Object_For_S3_Url);
-            original_Object_Url = s3StoreInterface.getOriginalImageFromS3(S3ImageDto.builder().s3ObjectUrl(original_Object_For_S3_Url).build());
+            original_Object_Url = s3StoreInterface.getOriginalImageFromS3(ImageDto.builder().s3ObjectUrl(original_Object_For_S3_Url).build());
 
             // 4a. Original image IS NOT present in S3, download image from the source
             if(Strings.isEmpty(original_Object_Url)){
                 log.debug("IMAGE_SERVICE ::::: show ::::: Original Image not found in S3, fetching from the source");
-                original_Object_Url = sourceStoreInterface.getOriginalImageFromSource(imageRequestDto);
+                original_Object_Url = sourceStoreInterface.getOriginalImageFromSource(ImageDto.builder().imageRequestDto(imageRequestDto).build());
                 if(Strings.isNotEmpty(original_Object_Url))
                     log.debug("IMAGE_SERVICE ::::: show ::::: Found Original Image at source located at {} ", original_Object_Url);
                 else {
@@ -96,7 +96,7 @@ public class ImageServiceImpl implements ImageService{
 
             //5. Optimise the fetched image from the source/s3
             log.debug("IMAGE_SERVICE ::::: show ::::: Compressing the Original Image {} ", original_Object_Url);
-            s3_Optimised_Url = s3StoreInterface.optimise(S3ImageDto.builder().s3ObjectUrl(original_Object_Url).imageRequestDto(imageRequestDto).build());
+            s3_Optimised_Url = s3StoreInterface.optimise(ImageDto.builder().s3ObjectUrl(original_Object_Url).imageRequestDto(imageRequestDto).build());
 
         } catch (Exception ex){
             log.error("IMAGE_SERVICE ::::: show ::::: System issues, Image not found. Try again later");
@@ -105,7 +105,7 @@ public class ImageServiceImpl implements ImageService{
 
         //5. Optimise the fetched image from the source and store in s3 storage.
         log.debug("IMAGE_SERVICE ::::: show ::::: Saving Original Image in S3 at {} ", s3_Optimised_Url);
-        s3_Optimised_Url = s3StoreInterface.save(S3ImageDto.builder().s3ObjectUrl(s3_Optimised_Url).imageRequestDto(imageRequestDto).build());
+        s3_Optimised_Url = s3StoreInterface.save(ImageDto.builder().s3ObjectUrl(s3_Optimised_Url).imageRequestDto(imageRequestDto).build());
 
         //6. Return the same optimised image back to the client.
         log.info("IMAGE_SERVICE ::::: show ::::: Compressed image saved successfully, returning to the client");
@@ -139,7 +139,7 @@ public class ImageServiceImpl implements ImageService{
         try{
             if(!preDefinedType.equalsIgnoreCase("original")){
                 log.debug("IMAGE_SERVICE ::::: flush ::::: Flushing compressed image with preDefinedType {}", preDefinedType);
-                return s3StoreInterface.flushImage(S3ImageDto.builder().s3ObjectUrl(imagePath).build());
+                return s3StoreInterface.flushImage(ImageDto.builder().s3ObjectUrl(imagePath).build());
             } else {
                 log.debug("IMAGE_SERVICE ::::: flush ::::: Finding all optimised images");
                 // 1. List all buckets
@@ -149,8 +149,8 @@ public class ImageServiceImpl implements ImageService{
                 // 3. Delete the contents if match is present during iteration
                 for (String bucket : buckets) {
                     log.debug("IMAGE_SERVICE ::::: flush ::::: Finding the optimised images in bucket {}", bucket);
-                    if(s3StoreInterface.doesObjectExist(S3ImageDto.builder().bucket(bucket).s3ObjectUrl(imagePath).build())) {
-                        s3StoreInterface.flushImage(S3ImageDto.builder().s3ObjectUrl(imagePath).build());
+                    if(s3StoreInterface.doesObjectExist(ImageDto.builder().bucket(bucket).s3ObjectUrl(imagePath).build())) {
+                        s3StoreInterface.flushImage(ImageDto.builder().s3ObjectUrl(imagePath).build());
                         log.info("IMAGE_SERVICE ::::: flush ::::: Found optimised image {}, flushed", imagePath);
                     }
                 }

@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class S3ImageDto {
+public class ImageDto {
 
     private String s3ObjectUrl;
     private ImageRequestDto imageRequestDto;
