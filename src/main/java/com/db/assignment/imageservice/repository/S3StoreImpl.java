@@ -1,7 +1,7 @@
 package com.db.assignment.imageservice.repository;
 
 import com.db.assignment.imageservice.exception.CustomS3Exception;
-import com.db.assignment.imageservice.model.ImageRequestDto;
+import com.db.assignment.imageservice.model.S3ImageDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -9,16 +9,13 @@ import java.util.Arrays;
 import java.util.List;
 
 @Repository
-public class ImageRepository {
+public class S3StoreImpl implements S3StoreInterface{
 
     @Value("${com.dbf.s3-service}")
     private String mocked_externalS3;
 
     @Value("${com.dbf.ext-source-service}")
     private String mocked_external_source;
-
-    @Value("${mock.response.getOriginalImageFromSource}")
-    private String mock_response_getOriginalImageFromSource;
 
     @Value("${mock.response.save}")
     private String mock_response_save;
@@ -38,43 +35,44 @@ public class ImageRepository {
     @Value("${mock.response.doesObjectExist}")
     private Boolean mock_response_doesObjectExist;
 
-    public String getOptimisedImageFromS3(String s3Url) {
+    public String getOptimisedImageFromS3(S3ImageDto s3ImageDto) {
         // Call to the external system to fetch from S3 [mocked_externalS3]
         return mock_response_getOptimisedImageFromS3;
     }
 
-    public String getOriginalImageFromS3(String s3Url) {
+    @Override
+    public String getOriginalImageFromS3(S3ImageDto s3ImageDto) {
         // Call to the external system to fetch from S3 [mocked_externalS3]
         return mock_response_getOriginalImageFromS3;
     }
 
-    public String getOriginalImageFromSource(ImageRequestDto imageRequestDto) {
-        // Call to the external system to fetch from source [mocked_external_source]
-        return mock_response_getOriginalImageFromSource;
-    }
-
-    public String save(String s3_original_url, ImageRequestDto imageRequestDto) throws CustomS3Exception {
+    @Override
+    public String save(S3ImageDto s3ImageDto) throws CustomS3Exception {
         // Call to the external system to save in S3 [mocked_externalS3]
 //        throw new CustomS3Exception("error");
         return mock_response_save;
     }
 
-    public boolean flushImage(String fileURL) {
+    @Override
+    public boolean flushImage(S3ImageDto s3ImageDto) {
         // Call to the external system to delete from S3 [mocked_externalS3]
         return mock_response_flushImage;
     }
 
+    @Override
     public List<String> getBuckets() {
         // Call to the external system to fetch from S3 [mocked_externalS3]
         return Arrays.asList("europe", "us", "ap", "china");
     }
 
-    public boolean doesObjectExist(String bucket, String imagePath) {
+    @Override
+    public boolean doesObjectExist(S3ImageDto s3ImageDto) {
         // Call to the external system to check from S3 [mocked_externalS3]
         return mock_response_doesObjectExist;
     }
 
-    public String optimise(String s3_original_url, ImageRequestDto imageRequestDto) {
+    @Override
+    public String optimise(S3ImageDto s3ImageDto) {
         return mock_response_optimise;
     }
 }

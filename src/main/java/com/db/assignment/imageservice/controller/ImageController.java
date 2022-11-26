@@ -4,7 +4,6 @@ import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
 import com.db.assignment.imageservice.service.ImageService;
 import com.db.assignment.imageservice.utils.ImageServiceConstants;
-import com.db.assignment.imageservice.utils.ImageServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

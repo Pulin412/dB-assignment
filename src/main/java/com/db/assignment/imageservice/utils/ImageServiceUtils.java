@@ -101,7 +101,7 @@ public class ImageServiceUtils {
                     .imageExtension(portraitConfig.getImageExtension())
                     .build();
         else{
-            log.info("IMAGE_SERVICE ::::: " + imageRequestDto.getPreDefinedType() + " not valid");
+            log.error("IMAGE_SERVICE ::::: Pre defined type {} not valid", imageRequestDto.getPreDefinedType());
             throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_IMAGE_NOT_FOUND);
         }
     }
