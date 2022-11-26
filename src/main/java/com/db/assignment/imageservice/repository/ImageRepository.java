@@ -2,19 +2,13 @@ package com.db.assignment.imageservice.repository;
 
 import com.db.assignment.imageservice.exception.CustomS3Exception;
 import com.db.assignment.imageservice.model.ImageRequestDto;
-import com.db.assignment.imageservice.model.ImageResponseDto;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class ImageRepository {
 
-    public ImageResponseDto fetchFromS3(String url){
+    public String getOptimisedImageFromS3(String s3Url) {
         return null;
-    }
-
-    public String getOptimisedImageFromS3(String s3Url) throws Exception {
-        return null;
-//        throw new Exception();
     }
 
     public String getOriginalImageFromS3(String s3Url) {
@@ -22,7 +16,7 @@ public class ImageRepository {
     }
 
     public String getOriginalImageFromSource(ImageRequestDto imageRequestDto) {
-        return null;
+        return "~/dir1/dir2/sourceImage";
     }
 
     public String compressAndSave(String s3_original_url, ImageRequestDto imageRequestDto) throws CustomS3Exception {

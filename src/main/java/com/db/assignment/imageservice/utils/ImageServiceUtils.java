@@ -20,6 +20,10 @@ public class ImageServiceUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ImageServiceUtils.class);
 
+    /*
+        Utility Method to create URL to match the AWS directory strategy
+        to fetch/store original and compressed images.
+     */
     public static String createS3Url(ImageRequestDto imageRequestDto) {
         String preDefinedType = imageRequestDto.getPreDefinedType();
         String reference = imageRequestDto.getReference();
@@ -54,6 +58,10 @@ public class ImageServiceUtils {
         return sb.toString();
     }
 
+    /*
+        Utility method to get the AWS directory URL for the original image
+        to be fetched from S3.
+     */
     public static String getOriginalImageURL(String s3Url) {
         String[] arr = s3Url.split("/");
         String preDefType = arr[1];
