@@ -19,3 +19,7 @@ Image service that can serve optimized images based on predefined properties.
 - Introduce a _Least Recently Used_ based Memcached cache with 80-20% rule i.e. 20% of daily read volume is generating 80% of the incoming traffic.
 - Isolate reads with writes.
 - replace spring retry with queues.
+
+### Misc
+- Logback with db appender is now available because of vulnerability [read here](https://logback.qos.ch/news.html#logback.db.1.2.11.1)
+- Work around could be to use file appender and export the logs to storage.
