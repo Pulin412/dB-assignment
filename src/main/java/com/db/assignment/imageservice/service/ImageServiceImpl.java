@@ -13,6 +13,7 @@ import com.db.assignment.imageservice.model.imageType.ImageType;
 import com.db.assignment.imageservice.model.imageType.Portrait_ImageType;
 import com.db.assignment.imageservice.model.imageType.Thumbnail_ImageType;
 import com.db.assignment.imageservice.repository.ImageRepository;
+import com.db.assignment.imageservice.utils.ImageServiceConstants;
 import com.db.assignment.imageservice.utils.ImageServiceUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public class ImageServiceImpl implements ImageService{
                     log.info("IMAGE_SERVICE ::::: show ::::: Found Original Image at source located at - " + original_Object_Url);
                 else {
                     log.error("IMAGE_SERVICE ::::: show ::::: Unable to find Original Image at source.");
-                    throw new ImageNotFoundException("System issues, Image not found. Try again later");
+                    throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_IMAGE_NOT_PRESENT_AT_SOURCE);
                 }
             }else {
                 log.info("IMAGE_SERVICE ::::: show ::::: Found Original Image in S3 at - " + original_Object_Url);
@@ -99,7 +100,7 @@ public class ImageServiceImpl implements ImageService{
 
         } catch (Exception ex){
             log.error("IMAGE_SERVICE ::::: show ::::: System issues, Image not found. Try again later");
-            throw new ImageNotFoundException("System issues, Image not found. Try again later");
+            throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_IMAGE_NOT_PRESENT_AT_SOURCE);
         }
 
         //5. Optimise the fetched image from the source and store in s3 storage.
@@ -156,7 +157,7 @@ public class ImageServiceImpl implements ImageService{
             }
         } catch (Exception ex){
             log.error("IMAGE_SERVICE ::::: flush ::::: System issue while deleting image(s). Try again later");
-            throw new ImageNotFoundException("System issue while deleting image(s). Try again later");
+            throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_FLUSH);
         }
 
         return true;
@@ -169,13 +170,13 @@ public class ImageServiceImpl implements ImageService{
 
         if(optionalMatch.isEmpty()){
             log.error("IMAGE_SERVICE ::::: validate :::::: " + preDefinedType + " not valid");
-            throw new ImageNotFoundException("Wrong details");
+            throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_VALIDATE_PRE_DEFINED_TYPE);
         }
 
         //validate reference is present; add a regex to validate the pattern
         if(reference == null) {
             log.error("IMAGE_SERVICE ::::: validate :::::: file Name not valid");
-            throw new ImageNotFoundException("Reference not found");
+            throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_VALIDATE_REFERENCE);
         }
 
     }
@@ -189,7 +190,7 @@ public class ImageServiceImpl implements ImageService{
         //validate reference is present; add a regex to validate the pattern
         if(imageRequestDto.getReference() == null) {
             log.error("IMAGE_SERVICE ::::: validate :::::: file Name not valid");
-            throw new ImageNotFoundException("Wrong details");
+            throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_VALIDATE_REFERENCE);
         }
     }
 

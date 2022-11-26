@@ -3,6 +3,8 @@ package com.db.assignment.imageservice.controller;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
 import com.db.assignment.imageservice.service.ImageService;
+import com.db.assignment.imageservice.utils.ImageServiceConstants;
+import com.db.assignment.imageservice.utils.ImageServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -42,7 +44,7 @@ public class ImageController {
                                              @RequestParam("reference") String reference) {
 
         boolean isDeleted = imageService.flush(preDefinedType, reference);
-        if (isDeleted) return new ResponseEntity<>("Image(s) deleted", HttpStatus.OK);
+        if (isDeleted) return new ResponseEntity<>(ImageServiceConstants.CONTROLLER_FLUSH_RESPONSE_MESSAGE, HttpStatus.OK);
         else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

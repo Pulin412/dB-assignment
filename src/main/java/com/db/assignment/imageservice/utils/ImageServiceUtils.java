@@ -34,7 +34,7 @@ public class ImageServiceUtils {
                 .findFirst();
 
         if(optionalMatch.isEmpty())
-            preDefinedType = "original";
+            preDefinedType = PreDefImageTypesEnum.ORIGINAL.name().toLowerCase();
 
         sb.append(preDefinedType);
         sb.append("/");
@@ -69,11 +69,11 @@ public class ImageServiceUtils {
     public static String getOriginalImageURL(String s3Url) {
         String[] arr = s3Url.split("/");
         String preDefType = arr[1];
-        return s3Url.replace(preDefType, "original");
+        return s3Url.replace(preDefType, PreDefImageTypesEnum.ORIGINAL.name().toLowerCase());
     }
 
     public static ImageType createImageType(ImageRequestDto imageRequestDto, String imageType, ThumbnailConfig thumbnailConfig, DetailLargeConfig detailLargeConfig, PortraitConfig portraitConfig) {
-        if(imageType.equalsIgnoreCase("thumbnail"))
+        if(imageType.equalsIgnoreCase(PreDefImageTypesEnum.THUMBNAIL.name().toLowerCase()))
             return Thumbnail_ImageType.builder()
                     .height(thumbnailConfig.getHeight())
                     .width(thumbnailConfig.getWidth())
@@ -82,7 +82,7 @@ public class ImageServiceUtils {
                     .scaleType(thumbnailConfig.getScaleType())
                     .imageExtension(thumbnailConfig.getImageExtension())
                     .build();
-        else  if(imageType.equalsIgnoreCase("detail-large"))
+        else  if(imageType.equalsIgnoreCase(PreDefImageTypesEnum.DETAILLARGE.name().toLowerCase()))
             return DetailLarge_ImageType.builder()
                     .height(detailLargeConfig.getHeight())
                     .width(detailLargeConfig.getWidth())
@@ -91,7 +91,7 @@ public class ImageServiceUtils {
                     .scaleType(detailLargeConfig.getScaleType())
                     .imageExtension(detailLargeConfig.getImageExtension())
                     .build();
-        else  if(imageType.equalsIgnoreCase("portrait"))
+        else  if(imageType.equalsIgnoreCase(PreDefImageTypesEnum.PORTRAIT.name().toLowerCase()))
             return Portrait_ImageType.builder()
                     .height(portraitConfig.getHeight())
                     .width(portraitConfig.getWidth())
@@ -102,7 +102,7 @@ public class ImageServiceUtils {
                     .build();
         else{
             log.info("IMAGE_SERVICE ::::: " + imageRequestDto.getPreDefinedType() + " not valid");
-            throw new ImageNotFoundException("Image not found");
+            throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_IMAGE_NOT_FOUND);
         }
     }
 }
