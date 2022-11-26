@@ -39,6 +39,10 @@ public class ImageServiceUtils {
         sb.append(preDefinedType);
         sb.append("/");
 
+        return getBucketPathFromFileName(reference, sb).toString();
+    }
+
+    public static StringBuilder getBucketPathFromFileName(String reference, StringBuilder sb){
         String storedReference = reference.replace('/', '_');
         String fileName = storedReference.substring(0, storedReference.indexOf('.'));
 
@@ -55,7 +59,7 @@ public class ImageServiceUtils {
         }
 
         sb.append(storedReference);
-        return sb.toString();
+        return sb;
     }
 
     /*

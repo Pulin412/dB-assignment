@@ -7,6 +7,7 @@ import com.db.assignment.imageservice.exception.CustomS3Exception;
 import com.db.assignment.imageservice.exception.ImageNotFoundException;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
+import com.db.assignment.imageservice.model.enums.PreDefImageTypesEnum;
 import com.db.assignment.imageservice.model.imageType.DetailLarge_ImageType;
 import com.db.assignment.imageservice.model.imageType.ImageType;
 import com.db.assignment.imageservice.model.imageType.Portrait_ImageType;
@@ -22,6 +23,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ImageServiceImpl implements ImageService{
@@ -47,6 +51,7 @@ public class ImageServiceImpl implements ImageService{
 
         // 1. Validate the incoming request
         validate(imageRequestDto);
+        log.info("IMAGE_SERVICE ::::: show ::::: validate ::::: Incoming request validated");
 
         String s3_Optimised_Url = "";
         String s3_Original_Url = "";
@@ -55,14 +60,14 @@ public class ImageServiceImpl implements ImageService{
         try {
             // 2. Create the S3 URL to access/store the optimised image
             String s3Url = ImageServiceUtils.createS3Url(imageRequestDto);
-            log.info("IMAGE_SERVICE ::::: Fetching Compressed Image from S3 located at - " + s3Url);
+            log.info("IMAGE_SERVICE ::::: show ::::: Fetching Compressed Image from S3 located at - " + s3Url);
 
             //3. Get the optimised image from S3 using the URL created at step 2
             s3_Optimised_Url = imageRepository.getOptimisedImageFromS3(s3Url);
 
             // 3a. Optimised image IS present, create and send the response to client
             if(Strings.isNotEmpty(s3_Optimised_Url)){
-                log.info("IMAGE_SERVICE ::::: Found compressed Image at [" + s3_Optimised_Url + "]... Returning to client");
+                log.info("IMAGE_SERVICE ::::: show ::::: Found compressed Image at [" + s3_Optimised_Url + "]... Returning to client");
                 return ImageResponseDto.builder()
                         .s3BucketUrl(s3_Optimised_Url)
                         .build();
@@ -71,33 +76,33 @@ public class ImageServiceImpl implements ImageService{
             // 3b. Optimised image IS NOT present
             // 4. Get the original image from S3 using the same URL created in step 2
             s3OriginalImageUrl = ImageServiceUtils.getOriginalImageURL(s3Url);
-            log.info("IMAGE_SERVICE ::::: Compressed Image not Present in S3, checking Original Image in S3 at - " + s3OriginalImageUrl);
+            log.info("IMAGE_SERVICE ::::: show ::::: Compressed Image not Present in S3, checking Original Image in S3 at - " + s3OriginalImageUrl);
             s3_Original_Url = imageRepository.getOriginalImageFromS3(s3OriginalImageUrl);
 
             // 4a. Original image IS NOT present in S3, download image from the source
             if(Strings.isEmpty(s3_Original_Url)){
-                log.info("IMAGE_SERVICE ::::: Original Image not found in S3, fetching from the source");
+                log.info("IMAGE_SERVICE ::::: show ::::: Original Image not found in S3, fetching from the source");
                 s3_Original_Url = imageRepository.getOriginalImageFromSource(imageRequestDto);
                 if(Strings.isNotEmpty(s3_Original_Url))
-                    log.info("IMAGE_SERVICE ::::: Found Original Image at source located at - " + s3_Original_Url);
+                    log.info("IMAGE_SERVICE ::::: show ::::: Found Original Image at source located at - " + s3_Original_Url);
                 else {
-                    log.error("IMAGE_SERVICE ::::: Unable to find Original Image at source.");
+                    log.error("IMAGE_SERVICE ::::: show ::::: Unable to find Original Image at source.");
                     throw new ImageNotFoundException("System issues, Image not found. Try again later");
                 }
             }else {
-                log.info("IMAGE_SERVICE ::::: Found Original Image in S3 at - " + s3_Original_Url);
+                log.info("IMAGE_SERVICE ::::: show ::::: Found Original Image in S3 at - " + s3_Original_Url);
             }
         } catch (Exception ex){
-            log.error("IMAGE_SERVICE ::::: System issues, Image not found. Try again later");
+            log.error("IMAGE_SERVICE ::::: show ::::: System issues, Image not found. Try again later");
             throw new ImageNotFoundException("System issues, Image not found. Try again later");
         }
 
         //5. Optimise the fetched image from the source and store in s3 storage.
-        log.info("IMAGE_SERVICE ::::: Compressing and Saving Original Image in S3 at - " + s3OriginalImageUrl);
+        log.info("IMAGE_SERVICE ::::: show ::::: Compressing and Saving Original Image in S3 at - " + s3OriginalImageUrl);
         s3_Optimised_Url = imageRepository.compressAndSave(s3_Original_Url, imageRequestDto);
 
         //6. Return the same optimised image back to the client.
-        log.info("IMAGE_SERVICE ::::: Compressed image saved successfully, returning to the client");
+        log.info("IMAGE_SERVICE ::::: show ::::: Compressed image saved successfully, returning to the client");
         return ImageResponseDto.builder()
                 .s3BucketUrl(s3_Optimised_Url)
                 .build();
@@ -105,25 +110,81 @@ public class ImageServiceImpl implements ImageService{
 
     @Recover
     public ImageResponseDto recover(CustomS3Exception e, ImageRequestDto imageRequestDto){
-        log.error("IMAGE_SERVICE ::::: Issue in connecting with external systems, quitting..");
+        log.error("IMAGE_SERVICE ::::: show ::::: Issue in connecting with external systems, quitting..");
         return ImageResponseDto.builder().build();
     }
 
     @Override
     public boolean flush(String preDefinedType, String reference) {
-        return false;
+
+        // 1. Validate the incoming request
+        validateObject(preDefinedType, reference);
+        log.info("IMAGE_SERVICE ::::: flush :::: validate ::::: Incoming request validated");
+
+        StringBuilder objectPath = new StringBuilder("/" + preDefinedType + "/");
+
+        /* check preDefinedType:
+                'Original' : Find with file name in the buckets
+                Others : Create the bucket name using file Name and pass the URL for deletion.
+         */
+        String imagePath = ImageServiceUtils.getBucketPathFromFileName(reference, objectPath).toString();
+        log.info("IMAGE_SERVICE ::::: flush ::::: Flushing image with path - " + imagePath);
+
+        try{
+            if(!preDefinedType.equalsIgnoreCase("original")){
+                log.info("IMAGE_SERVICE ::::: flush ::::: Flushing compressed image with preDefinedType - " + preDefinedType);
+                return imageRepository.flushImage(imagePath);
+            } else {
+                log.info("IMAGE_SERVICE ::::: flush ::::: Finding all optimised images");
+                // 1. List all buckets
+                List<String> buckets = imageRepository.getBuckets();
+
+                // 2. Iterate through all buckets and search for created file Name as per AWS S3 directory strategy
+                // 3. Delete the contents if match is present during iteration
+                for (String bucket : buckets) {
+                    log.info("IMAGE_SERVICE ::::: flush ::::: Finding the optimised images in bucket - " + bucket);
+                    if(imageRepository.doesObjectExist(bucket, imagePath)) {
+                        imageRepository.flushImage(imagePath);
+                        log.info("IMAGE_SERVICE ::::: flush ::::: Found optimised image {}, flushed", imagePath);
+                    }
+                }
+            }
+        } catch (Exception ex){
+            log.error("IMAGE_SERVICE ::::: flush ::::: System issue while deleting image(s). Try again later");
+            throw new ImageNotFoundException("System issue while deleting image(s). Try again later");
+        }
+
+        return true;
+    }
+
+    private void validateObject(String preDefinedType, String reference) {
+        Optional<PreDefImageTypesEnum> optionalMatch = Arrays.stream(PreDefImageTypesEnum.values())
+                .filter(val -> val.name().equalsIgnoreCase((preDefinedType)))
+                .findFirst();
+
+        if(optionalMatch.isEmpty()){
+            log.error("IMAGE_SERVICE ::::: validate :::::: " + preDefinedType + " not valid");
+            throw new ImageNotFoundException("Wrong details");
+        }
+
+        //validate reference is present; add a regex to validate the pattern
+        if(reference == null) {
+            log.error("IMAGE_SERVICE ::::: validate :::::: file Name not valid");
+            throw new ImageNotFoundException("Reference not found");
+        }
+
     }
 
     private void validate(ImageRequestDto imageRequestDto){
 
         //validate and create preDefinedImageType object
         imageRequestDto.setImageType(createImageType(imageRequestDto, imageRequestDto.getPreDefinedType()));
-        log.info("IMAGE SERVICE :::::: Set predefined Image Type with details - " + imageRequestDto.getImageType());
+        log.info("IMAGE SERVICE :::::: validate :::::: Set predefined Image Type with details - " + imageRequestDto.getImageType());
 
         //validate reference is present; add a regex to validate the pattern
         if(imageRequestDto.getReference() == null) {
-            log.info("IMAGE_SERVICE ::::: " + imageRequestDto.getReference() + " not valid");
-            throw new ImageNotFoundException("Reference not found");
+            log.error("IMAGE_SERVICE ::::: validate :::::: file Name not valid");
+            throw new ImageNotFoundException("Wrong details");
         }
     }
 

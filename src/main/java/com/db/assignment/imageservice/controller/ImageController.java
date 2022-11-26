@@ -37,7 +37,7 @@ public class ImageController {
                 , HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/flush/{preDefinedType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/flush/{preDefinedType}")
     public ResponseEntity<String> flushImage(@PathVariable String preDefinedType,
                                              @RequestParam("reference") String reference) {
 
