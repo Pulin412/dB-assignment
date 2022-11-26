@@ -1,23 +1,23 @@
 package com.db.assignment.imageservice.repository;
 
 import com.db.assignment.imageservice.exception.CustomS3Exception;
-import com.db.assignment.imageservice.model.ImageDto;
+import com.db.assignment.imageservice.model.ExternalImageDto;
 
 import java.util.List;
 
 public interface S3StoreInterface {
 
-    String getOptimisedImageFromS3(ImageDto imageDto);
+    String getOptimisedImageFromS3(ExternalImageDto externalImageDto);
 
-    String getOriginalImageFromS3(ImageDto imageDto);
+    String getOriginalImageFromS3(ExternalImageDto externalImageDto);
 
-    String save(ImageDto imageDto) throws CustomS3Exception;
+    String save(ExternalImageDto externalImageDto) throws CustomS3Exception;
 
-    boolean flushImage(ImageDto imageDto);
+    boolean flushImage(ExternalImageDto externalImageDto);
 
     List<String> getBuckets();
 
-    boolean doesObjectExist(ImageDto imageDto);
+    boolean doesObjectExist(ExternalImageDto externalImageDto);
 
-    String optimise(ImageDto imageDto);
+    String optimise(ExternalImageDto externalImageDto);
 }

@@ -1,7 +1,9 @@
 package com.db.assignment.imageservice.repository;
 
+import com.db.assignment.imageservice.config.AwsS3Config;
 import com.db.assignment.imageservice.exception.CustomS3Exception;
-import com.db.assignment.imageservice.model.ImageDto;
+import com.db.assignment.imageservice.model.ExternalImageDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -35,26 +37,29 @@ public class S3StoreImpl implements S3StoreInterface{
     @Value("${mock.response.doesObjectExist}")
     private Boolean mock_response_doesObjectExist;
 
-    public String getOptimisedImageFromS3(ImageDto imageDto) {
+    @Autowired
+    private AwsS3Config awsS3Config;
+
+    public String getOptimisedImageFromS3(ExternalImageDto externalImageDto) {
         // Call to the external system to fetch from S3 [mocked_externalS3]
         return mock_response_getOptimisedImageFromS3;
     }
 
     @Override
-    public String getOriginalImageFromS3(ImageDto imageDto) {
+    public String getOriginalImageFromS3(ExternalImageDto externalImageDto) {
         // Call to the external system to fetch from S3 [mocked_externalS3]
         return mock_response_getOriginalImageFromS3;
     }
 
     @Override
-    public String save(ImageDto imageDto) throws CustomS3Exception {
+    public String save(ExternalImageDto externalImageDto) throws CustomS3Exception {
         // Call to the external system to save in S3 [mocked_externalS3]
 //        throw new CustomS3Exception("error");
         return mock_response_save;
     }
 
     @Override
-    public boolean flushImage(ImageDto imageDto) {
+    public boolean flushImage(ExternalImageDto externalImageDto) {
         // Call to the external system to delete from S3 [mocked_externalS3]
         return mock_response_flushImage;
     }
@@ -66,13 +71,13 @@ public class S3StoreImpl implements S3StoreInterface{
     }
 
     @Override
-    public boolean doesObjectExist(ImageDto imageDto) {
+    public boolean doesObjectExist(ExternalImageDto externalImageDto) {
         // Call to the external system to check from S3 [mocked_externalS3]
         return mock_response_doesObjectExist;
     }
 
     @Override
-    public String optimise(ImageDto imageDto) {
+    public String optimise(ExternalImageDto externalImageDto) {
         return mock_response_optimise;
     }
 }

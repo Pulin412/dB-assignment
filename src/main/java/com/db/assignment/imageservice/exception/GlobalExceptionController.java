@@ -30,4 +30,14 @@ public class GlobalExceptionController {
                 LocalDateTime.now(),
                 ex.getMessage());
     }
+
+    @ExceptionHandler(GenericException.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    public ErrorMessage genericException(GenericException ex, WebRequest request) {
+
+        return new ErrorMessage(
+                HttpStatus.NOT_FOUND,
+                LocalDateTime.now(),
+                ex.getMessage());
+    }
 }

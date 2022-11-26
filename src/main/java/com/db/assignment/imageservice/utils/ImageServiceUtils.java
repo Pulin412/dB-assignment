@@ -3,7 +3,7 @@ package com.db.assignment.imageservice.utils;
 import com.db.assignment.imageservice.config.ImageTypes.DetailLargeConfig;
 import com.db.assignment.imageservice.config.ImageTypes.PortraitConfig;
 import com.db.assignment.imageservice.config.ImageTypes.ThumbnailConfig;
-import com.db.assignment.imageservice.exception.ImageNotFoundException;
+import com.db.assignment.imageservice.exception.GenericException;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.enums.PreDefImageTypesEnum;
 import com.db.assignment.imageservice.model.imageType.DetailLarge_ImageType;
@@ -102,7 +102,7 @@ public class ImageServiceUtils {
                     .build();
         else{
             log.error("IMAGE_SERVICE ::::: Pre defined type {} not valid", imageRequestDto.getPreDefinedType());
-            throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_IMAGE_NOT_FOUND);
+            throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_INVALID_PRE_DEFINED_TYPE);
         }
     }
 }

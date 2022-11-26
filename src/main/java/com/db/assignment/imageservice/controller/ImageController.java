@@ -1,5 +1,6 @@
 package com.db.assignment.imageservice.controller;
 
+import com.db.assignment.imageservice.model.ImageMetaData;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
 import com.db.assignment.imageservice.service.ImageService;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/image")
@@ -34,6 +36,7 @@ public class ImageController {
                                 .preDefinedType(preDefinedType)
                                 .seo(seo)
                                 .reference(reference)
+                                .imageMetaData(ImageMetaData.builder().imageId(UUID.randomUUID()).imageName(reference).build())
                                 .build())
                 , HttpStatus.OK);
     }

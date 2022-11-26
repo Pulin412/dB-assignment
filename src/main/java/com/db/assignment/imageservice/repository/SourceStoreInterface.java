@@ -1,8 +1,8 @@
 package com.db.assignment.imageservice.repository;
 
-import com.db.assignment.imageservice.model.ImageDto;
+import com.db.assignment.imageservice.model.ExternalImageDto;
 
 public interface SourceStoreInterface {
 
-    String getOriginalImageFromSource(ImageDto imageDto);
+    String getOriginalImageFromSource(ExternalImageDto externalImageDto);
 }
