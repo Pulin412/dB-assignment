@@ -12,6 +12,7 @@ import com.db.assignment.imageservice.model.imageType.ImageType;
 import com.db.assignment.imageservice.model.imageType.Portrait_ImageType;
 import com.db.assignment.imageservice.model.imageType.Thumbnail_ImageType;
 import com.db.assignment.imageservice.repository.ImageRepository;
+import com.db.assignment.imageservice.utils.ImageServiceUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,35 +45,43 @@ public class ImageServiceImpl implements ImageService{
             listeners = {"defaultListenerSupport"})
     public ImageResponseDto getImage(ImageRequestDto imageRequestDto) throws IOException {
 
+        // 1. Validate the incoming request
         validate(imageRequestDto);
 
         String s3_Optimised_Url = "";
         String s3_Original_Url = "";
 
         try {
-            s3_Optimised_Url = imageRepository.getOptimisedImageFromS3(imageRequestDto);
+            // 2. Create the S3 URL to access/store the optimised image
+            String s3Url = ImageServiceUtils.createS3Url(imageRequestDto);
 
+            //3. Get the optimised image from S3 using the URL created at step 2
+            s3_Optimised_Url = imageRepository.getOptimisedImageFromS3(s3Url);
+
+            // 3a. Optimised image IS present, create and send the response to client
             if(Strings.isNotEmpty(s3_Optimised_Url)){
                 return ImageResponseDto.builder()
                         .s3BucketUrl(s3_Optimised_Url)
                         .build();
             }
 
-            s3_Original_Url = imageRepository.getOriginalImageFromS3(imageRequestDto);
+            // 3b. Optimised image IS NOT present
+            // 4. Get the original image from S3 using the same URL created in step 2
+            s3_Original_Url = imageRepository.getOriginalImageFromS3(s3Url);
 
+            // 4a. Original image IS NOT present in S3, download image from the source
             if(Strings.isEmpty(s3_Original_Url)){
-                // download image from source
                 s3_Original_Url = imageRepository.getOriginalImageFromSource(imageRequestDto);
             }
-
         } catch (Exception ex){
             log.error("IMAGE_SERVICE ::::: System issues, Image not found");
             throw new ImageNotFoundException("System issues, Image not found");
         }
 
-        // compress image and store in s3
+        //5. Optimise the fetched image from the source and store in s3 storage.
         s3_Optimised_Url = imageRepository.compressAndSave(s3_Original_Url, imageRequestDto);
 
+        //6. Return the same optimised image back to the client.
         return ImageResponseDto.builder()
                 .s3BucketUrl(s3_Optimised_Url)
                 .build();
@@ -103,37 +112,6 @@ public class ImageServiceImpl implements ImageService{
     }
 
     private ImageType createImageType(ImageRequestDto imageRequestDto, String imageType){
-
-        if(imageType.equalsIgnoreCase("thumbnail"))
-            return Thumbnail_ImageType.builder()
-                    .height(thumbnailConfig.getHeight())
-                    .width(thumbnailConfig.getWidth())
-                    .quality(thumbnailConfig.getQuality())
-                    .fillColor(thumbnailConfig.getFillColor())
-                    .scaleType(thumbnailConfig.getScaleType())
-                    .imageExtension(thumbnailConfig.getImageExtension())
-                    .build();
-        else  if(imageType.equalsIgnoreCase("detail-large"))
-            return DetailLarge_ImageType.builder()
-                    .height(detailLargeConfig.getHeight())
-                    .width(detailLargeConfig.getWidth())
-                    .quality(detailLargeConfig.getQuality())
-                    .fillColor(detailLargeConfig.getFillColor())
-                    .scaleType(detailLargeConfig.getScaleType())
-                    .imageExtension(detailLargeConfig.getImageExtension())
-                    .build();
-        else  if(imageType.equalsIgnoreCase("portrait"))
-            return Portrait_ImageType.builder()
-                    .height(portraitConfig.getHeight())
-                    .width(portraitConfig.getWidth())
-                    .quality(portraitConfig.getQuality())
-                    .fillColor(portraitConfig.getFillColor())
-                    .scaleType(portraitConfig.getScaleType())
-                    .imageExtension(portraitConfig.getImageExtension())
-                    .build();
-        else{
-            log.info("IMAGE_SERVICE ::::: " + imageRequestDto.getPreDefinedType() + " not valid");
-            throw new ImageNotFoundException("Image not found");
-        }
+        return ImageServiceUtils.createImageType(imageRequestDto, imageType, thumbnailConfig, detailLargeConfig, portraitConfig);
     }
 }

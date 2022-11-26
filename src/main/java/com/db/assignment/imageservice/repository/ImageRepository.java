@@ -12,12 +12,12 @@ public class ImageRepository {
         return null;
     }
 
-    public String getOptimisedImageFromS3(ImageRequestDto imageRequestDto) throws Exception {
+    public String getOptimisedImageFromS3(String s3Url) throws Exception {
         return null;
 //        throw new Exception();
     }
 
-    public String getOriginalImageFromS3(ImageRequestDto imageRequestDto) {
+    public String getOriginalImageFromS3(String s3Url) {
         return null;
     }
 
