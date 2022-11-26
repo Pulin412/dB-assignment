@@ -13,7 +13,6 @@ import com.db.assignment.imageservice.repository.SourceStoreInterface;
 import com.db.assignment.imageservice.service.imageTypeStrategy.ImageTypeStrategy;
 import com.db.assignment.imageservice.service.imageTypeStrategy.ImageTypeStrategyFactory;
 import com.db.assignment.imageservice.utils.ImageServiceConstants;
-import com.db.assignment.imageservice.utils.ImageServiceUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +30,14 @@ public class ImageServiceImpl implements ImageService{
 
     private final S3StoreInterface s3StoreInterface;
     private final SourceStoreInterface sourceStoreInterface;
-
+    private final S3OperationService s3OperationService;
     private final ImageTypeStrategyFactory imageTypeStrategyFactory;
     private final Logger log = LoggerFactory.getLogger(ImageServiceImpl.class);
 
-    public ImageServiceImpl(S3StoreInterface s3StoreInterface, SourceStoreInterface sourceStoreInterface, ImageTypeStrategyFactory imageTypeStrategyFactory) {
+    public ImageServiceImpl(S3StoreInterface s3StoreInterface, SourceStoreInterface sourceStoreInterface, S3OperationService s3OperationService, ImageTypeStrategyFactory imageTypeStrategyFactory) {
         this.s3StoreInterface = s3StoreInterface;
         this.sourceStoreInterface = sourceStoreInterface;
+        this.s3OperationService = s3OperationService;
         this.imageTypeStrategyFactory = imageTypeStrategyFactory;
     }
 
@@ -57,7 +57,7 @@ public class ImageServiceImpl implements ImageService{
 
         try {
             // 2. Create the S3 URL to access/store the optimised image
-            String object_For_S3_Url = ImageServiceUtils.createS3Url(imageRequestDto);
+            String object_For_S3_Url = s3OperationService.createS3Url(imageRequestDto);
             log.debug("IMAGE_SERVICE ::::: show ::::: Fetching Compressed Image {} from S3 located at - {} ", imageRequestDto.getImageMetaData().getImageId(), object_For_S3_Url);
 
             //3. Get the optimised image from S3 using the URL created at step 2
@@ -73,7 +73,7 @@ public class ImageServiceImpl implements ImageService{
 
             // 3b. Optimised image IS NOT present
             // 4. Get the original image from S3 using the same URL created in step 2
-            String original_Object_For_S3_Url = ImageServiceUtils.getOriginalImageURL(object_For_S3_Url);
+            String original_Object_For_S3_Url = s3OperationService.getOriginalImageURL(object_For_S3_Url);
             log.debug("IMAGE_SERVICE ::::: show ::::: Compressed Image {} not Present in S3, checking Original Image in S3 at {}", imageRequestDto.getImageMetaData().getImageId(), original_Object_For_S3_Url);
             original_Object_Url = s3StoreInterface.getOriginalImageFromS3(ExternalImageDto.builder().s3ObjectUrl(original_Object_For_S3_Url).build());
 
@@ -130,7 +130,7 @@ public class ImageServiceImpl implements ImageService{
                 'Original' : Find with file name in the buckets
                 Others : Create the bucket name using file Name and pass the URL for deletion.
          */
-        String imagePath = ImageServiceUtils.getBucketPathFromFileName(reference, objectPath).toString();
+        String imagePath = s3OperationService.getBucketPathFromFileName(reference, objectPath).toString();
         log.debug("IMAGE_SERVICE ::::: flush ::::: Flushing image with path {} ", imagePath);
 
         try{

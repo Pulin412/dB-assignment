@@ -1,22 +1,25 @@
-package com.db.assignment.imageservice.utils;
+package com.db.assignment.imageservice.service;
 
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.enums.PreDefImageTypesEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-public class ImageServiceUtils {
+@Service
+public class S3OperationServiceImpl implements S3OperationService{
 
-    private static final Logger log = LoggerFactory.getLogger(ImageServiceUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(S3OperationServiceImpl.class);
 
     /*
         Utility Method to create URL to match the AWS directory strategy
         to fetch/store original and compressed images.
      */
-    public static String createS3Url(ImageRequestDto imageRequestDto) {
+    @Override
+    public String createS3Url(ImageRequestDto imageRequestDto) {
         String preDefinedType = imageRequestDto.getPreDefinedType();
         String reference = imageRequestDto.getReference();
         StringBuilder sb = new StringBuilder("~/");
@@ -34,7 +37,8 @@ public class ImageServiceUtils {
         return getBucketPathFromFileName(reference, sb).toString();
     }
 
-    public static StringBuilder getBucketPathFromFileName(String reference, StringBuilder sb){
+    @Override
+    public StringBuilder getBucketPathFromFileName(String reference, StringBuilder sb){
         String storedReference = reference.replace('/', '_');
         String fileName = storedReference.substring(0, storedReference.indexOf('.'));
 
@@ -58,7 +62,8 @@ public class ImageServiceUtils {
         Utility method to get the AWS directory URL for the original image
         to be fetched from S3.
      */
-    public static String getOriginalImageURL(String s3Url) {
+    @Override
+    public String getOriginalImageURL(String s3Url) {
         String[] arr = s3Url.split("/");
         String preDefType = arr[1];
         return s3Url.replace(preDefType, PreDefImageTypesEnum.ORIGINAL.name().toLowerCase());
