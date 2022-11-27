@@ -149,6 +149,10 @@ A unified exception handling is implemented for the whole application using `Res
 
 - A few [Junits](https://github.com/Pulin412/dB-assignment/tree/main/src/test/java/com/db/assignment/imageservice/service) are written for ImageService and S3OperationService methods using `Mockito`.
 
+### Logs Appender
+
+- A dummy [custom](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/config/CustomDbAppender.java) DB log appender is implemented as the support for logback DB appender has been removed from log4j due to vulnerabilities [read here](https://logback.qos.ch/news.html#logback.db.1.2.11.1)
+
 ## Steps to run the API
 
 - Use the Spring boot maven plugin to run the application - 
