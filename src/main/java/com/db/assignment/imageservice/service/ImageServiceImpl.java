@@ -67,12 +67,15 @@ public class ImageServiceImpl implements ImageService{
             optionalExternalImageResponseDto = s3StoreRepo.getOptimisedImageFromS3(ExternalImageDto.builder().s3ObjectUrl(object_For_S3_Url).build());
             if(optionalExternalImageResponseDto.isPresent()){
                 optimised_Object_From_S3_Url = optionalExternalImageResponseDto.get().getSourceImageUrl();
+            } else {
+                throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_GENERIC);
             }
 
             // 3a. Optimised image IS present, create and send the response to client
             if(Strings.isNotEmpty(optimised_Object_From_S3_Url)){
                 log.debug("IMAGE_SERVICE ::::: getImage ::::: Found compressed Image {} at {} ... Returning to client", imageRequestDto.getImageMetaData().getImageId(), optimised_Object_From_S3_Url);
                 return ImageResponseDto.builder()
+                        .imageId(optionalExternalImageResponseDto.get().getImageId())
                         .s3BucketUrl(optimised_Object_From_S3_Url)
                         .build();
             }
@@ -85,6 +88,8 @@ public class ImageServiceImpl implements ImageService{
             optionalExternalImageResponseDto = s3StoreRepo.getOriginalImageFromS3(ExternalImageDto.builder().s3ObjectUrl(original_Object_For_S3_Url).build());
             if(optionalExternalImageResponseDto.isPresent()){
                 original_Object_Url = optionalExternalImageResponseDto.get().getSourceImageUrl();
+            } else {
+                throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_GENERIC);
             }
 
             // 4a. Original image IS NOT present in S3, download image from the source
@@ -107,10 +112,14 @@ public class ImageServiceImpl implements ImageService{
             optionalExternalImageResponseDto = s3StoreRepo.optimise(ExternalImageDto.builder().s3ObjectUrl(original_Object_Url).imageRequestDto(imageRequestDto).build());
             if(optionalExternalImageResponseDto.isPresent()){
                 s3_Optimised_Url = optionalExternalImageResponseDto.get().getSourceImageUrl();
+            } else {
+                throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_GENERIC);
             }
 
         } catch (ImageNotFoundException ex){
             throw new ImageNotFoundException(ex.getMessage());
+        } catch (GenericException ex){
+            throw new GenericException(ex.getMessage());
         } catch (Exception ex){
             log.error("IMAGE_SERVICE ::::: getImage ::::: System issues, Image not found. Try again later");
             throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_GENERIC);
@@ -121,11 +130,14 @@ public class ImageServiceImpl implements ImageService{
         optionalExternalImageResponseDto = s3StoreRepo.save(ExternalImageDto.builder().s3ObjectUrl(s3_Optimised_Url).imageRequestDto(imageRequestDto).build());
         if(optionalExternalImageResponseDto.isPresent()){
             s3_Optimised_Url = optionalExternalImageResponseDto.get().getSourceImageUrl();
+        } else {
+            throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_GENERIC);
         }
 
         //6. Return the same optimised image back to the client.
         log.info("IMAGE_SERVICE ::::: getImage ::::: Compressed image {} saved successfully, returning to the client", imageRequestDto.getImageMetaData().getImageId());
         return ImageResponseDto.builder()
+                .imageId(optionalExternalImageResponseDto.get().getImageId())
                 .s3BucketUrl(s3_Optimised_Url)
                 .build();
     }
