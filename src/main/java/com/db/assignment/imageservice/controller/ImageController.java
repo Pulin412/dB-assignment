@@ -26,7 +26,7 @@ public class ImageController {
         this.imageService = imageService;
     }
 
-    @GetMapping(value = "/show/{preDefinedType}/{seo}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"/show/{preDefinedType}/{seo}","/show/{preDefinedType}"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ImageResponseDto> fetchImage(@PathVariable String preDefinedType,
                                                        @PathVariable(required = false) String seo,
                                                        @RequestParam("reference") String reference) throws IOException {
