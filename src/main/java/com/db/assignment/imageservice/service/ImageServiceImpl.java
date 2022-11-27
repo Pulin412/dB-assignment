@@ -40,9 +40,6 @@ public class ImageServiceImpl implements ImageService{
     }
 
     @Override
-    @Retryable(retryFor = CustomS3Exception.class, maxAttemptsExpression = "${retry.maxAttempts}",
-            backoff = @Backoff(delayExpression = "${retry.maxDelay}"),
-            listeners = {"defaultListenerSupport"})
     public ImageResponseDto getImage(ImageRequestDto imageRequestDto) {
 
         // 1. Validate the incoming request
@@ -124,6 +121,7 @@ public class ImageServiceImpl implements ImageService{
         //5. Optimise the fetched image from the source and store in s3 storage.
         log.debug("IMAGE_SERVICE ::::: getImage ::::: Saving Original Image {} in S3 at {} ", imageRequestDto.getImageMetaData().getImageId(), s3_Optimised_Url);
         optionalExternalImageResponseDto = s3OperationService.save(ExternalImageDto.builder().s3ObjectUrl(s3_Optimised_Url).imageRequestDto(imageRequestDto).build());
+
         if(optionalExternalImageResponseDto.isPresent()){
             s3_Optimised_Url = optionalExternalImageResponseDto.get().getSourceImageUrl();
         } else {
@@ -138,10 +136,8 @@ public class ImageServiceImpl implements ImageService{
                 .build();
     }
 
-    @Recover
-    public ImageResponseDto recover(CustomS3Exception e, ImageRequestDto imageRequestDto){
-        log.error("IMAGE_SERVICE ::::: getImage ::::: Issue in connecting with external systems, quitting..");
-        throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_IMAGE_NOT_FOUND);
+    public Optional<ExternalImageResponseDto> save(ExternalImageDto externalImageDto) throws CustomS3Exception {
+        return s3OperationService.save(externalImageDto);
     }
 
     @Override

@@ -1,13 +1,17 @@
 package com.db.assignment.imageservice.service;
 
 import com.db.assignment.imageservice.exception.CustomS3Exception;
+import com.db.assignment.imageservice.exception.ImageNotFoundException;
 import com.db.assignment.imageservice.model.ExternalImageDto;
 import com.db.assignment.imageservice.model.ExternalImageResponseDto;
 import com.db.assignment.imageservice.model.ImageRequestDto;
+import com.db.assignment.imageservice.model.ImageResponseDto;
 import com.db.assignment.imageservice.model.enums.ImageTypeStrategyNameEnum;
 import com.db.assignment.imageservice.repository.S3StoreRepo;
+import com.db.assignment.imageservice.utils.ImageServiceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -119,5 +123,11 @@ public class S3OperationServiceImpl implements S3OperationService{
     @Override
     public Optional<ExternalImageResponseDto> optimise(ExternalImageDto externalImageDto) {
         return s3StoreRepo.optimise(externalImageDto);
+    }
+
+    @Override
+    public Optional<ExternalImageResponseDto>  recover(CustomS3Exception e, ExternalImageDto externalImageDto){
+        log.error("IMAGE_SERVICE ::::: getImage ::::: Issue in connecting with external systems, quitting..");
+        throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_IMAGE_NOT_FOUND);
     }
 }

@@ -48,6 +48,14 @@ Multiple services are implemented to handle certain functionalities and to isola
     retry.maxAttempts=1
     retry.maxDelay=200 
   ```
+  - To test the retry functionality, comment the mocked response with the thrown exception [here](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/repository/S3StoreRepoImpl.java#L66)
+  ```java
+        //  throw new CustomS3Exception("error");
+            return Optional.of(ExternalImageResponseDto.builder()
+                .imageId(UUID.randomUUID())
+                .sourceImageUrl(mock_response_save)
+                .build());
+  ```   
 
 - [S3OperationService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/service/S3OperationService.java)
 
