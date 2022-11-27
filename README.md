@@ -43,6 +43,11 @@ Multiple services are implemented to handle certain functionalities and to isola
     - Main service responsible to fetch and flush the optimised images back to the controller layer.
     - Interacts with other services to connect to S3 or other external systems.
     - For future extensibility, the same service can be reused and other storage services implementations can be done.
+    - This also includes the retry mechanism in case `save` operation throws exception which is captured as `CustomS3Exception` in the API. Following [properties](https://github.com/Pulin412/dB-assignment/blob/main/src/main/resources/retryConfig.properties) can be modified to customize retries -
+   ```properties
+    retry.maxAttempts=1
+    retry.maxDelay=200 
+  ```
 
 - [S3OperationService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/service/S3OperationService.java)
 
