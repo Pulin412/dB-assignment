@@ -126,10 +126,10 @@ A unified exception handling is implemented for the whole application using `Res
 
 - [ImageRequestDTO](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ImageRequestDto.java) and [ImageResponseDTO](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ImageResponseDto.java) are the main DTOs to handle the data transfer between Controller and ImageService.
 - [ImageMetaData](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ImageMetaData.java) is present for future use. Image metadata can be saved in a NoSql Database for quick access.
-- [ExternalImageDto](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ExternalImageDto.java) and [ExternalImageResponseDto](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ExternalImageResponseDto.java) are used to communicate between ImageService and S3StoreRepo and SourceStoreRepo. We can separate the DTOs for these two services but since its a dummy call, both calls use the same DTO.
+- [ExternalImageDto](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ExternalImageDto.java) and [ExternalImageResponseDto](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ExternalImageResponseDto.java) are used to communicate between ImageService and S3OperationService and SourceStoreRepo. We can separate the DTOs for these two services but since its a dummy call, both calls use the same DTO.
 - ImageType
 
-    - [ImageType](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/imageType/ImageType.java) is used as an Abstract case with properties common to all ImageType.
+    - [ImageType](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/imageType/ImageType.java) is used as an Abstract class with properties common to all ImageType.
     - Implementation for the ImageType Abstract class are added such as [Thumbnail_ImageType](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/imageType/Thumbnail_ImageType.java).
 
 ### Unit test cases
@@ -160,9 +160,4 @@ Flush Image -
 - DynamoDB (key value database)/ Cassandra DB (Distributed NoSql) to store images metadata.
 - Key generation service to generate image IDs for sharded database.
 - Introduce a _Least Recently Used_ based Memcached cache with 80-20% rule i.e. 20% of daily read volume is generating 80% of the incoming traffic.
-- Isolate reads with writes.
-
-
-
-## Misc
-- Logback with db appender is now available because of vulnerability [read here](https://logback.qos.ch/news.html#logback.db.1.2.11.1)
+- Isolate reads with writes. Implement queue based solution for writes if Consistency can take a hit instead of Availability.
