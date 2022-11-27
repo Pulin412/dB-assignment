@@ -156,6 +156,25 @@ Flush Image -
     localhost:8080/image/flush/original?reference=0277901000150001_pro_mod_frt_02_1108_1528_1059540.jpg
 ```
 
+> All mocked responses for the repositories can be handled via application.properties using these values:
+  ```properties
+      # Mocked external system URLs and responses
+      com.dbf.s3-service=https://mocked-s3-service.dbf.net/
+      com.dbf.ext-source-service=https://mocked-ext-source-service.dbf.net/
+      mock.response.getOriginalImageFromSource=~/dir1/dir2/sourceImage
+      
+      # Mocked responses for fetchImage method
+      mock.response.getOptimisedImageFromS3=
+      mock.response.getOriginalImageFromS3=
+      mock.response.optimise=/optimised/image/sample.png
+      mock.response.save=/optimised/saved/in/s3/image/sample.png
+      
+      # Mocked responses for flush method
+      mock.response.doesObjectExist=true
+      mock.response.flushImage=true
+  ```
+
+
 ## Improvements
 - DynamoDB (key value database)/ Cassandra DB (Distributed NoSql) to store images metadata.
 - Key generation service to generate image IDs for sharded database.
