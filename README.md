@@ -161,12 +161,12 @@ Access the below-mentioned sample URLs to hit the endpoints -
 
 Fetch Image - 
 ```html
-    localhost:8080/image/show/thumbnail/bb?reference=/somedir/anotherdir/abcdef.jpg
+    curl -X GET 'http://localhost:8080/image/show/detail_large/bb?reference=%2Fsomedir%2Fanotherdir%2Fabcdef.jpg'
 ```
 
 Flush Image -
 ```html
-    localhost:8080/image/flush/original?reference=0277901000150001_pro_mod_frt_02_1108_1528_1059540.jpg
+    curl -X DELETE 'http://localhost:8080/image/flush/original?reference=%2F027%2F790%2F13_0277901000150001_pro_mod_frt_02_1108_1528_1059540.jpg'
 ```
 
 > All mocked responses for the repositories can be handled via application.properties using these values:
