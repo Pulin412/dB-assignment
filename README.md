@@ -4,6 +4,7 @@ Image service that can serve optimized images based on predefined properties.
 
 ## Tech stack and Design patterns
 - Spring boot, H2 in-memory database.
+- `Builder Pattern` to construct objects step by step throughout the API.
 - `Factory and Strategy` design pattern for ImageTypes config to choose the Pre-defined image type and the related configurations on run-time. Good for `Open-Closed Principal` (SOLID principles).
 - `Gateway pattern` for external systems interactions. Good for Separation of concerns while interacting with multiple external services for added operations like mapping the DTOs, making connections etc. More external systems can be added later on and associated with the Gateway instead of changing any configuration in the main Service. 
 - `Data Transfer Objects (DTO)` to transfer data between different layers and encapsulate all the required details within an object.
