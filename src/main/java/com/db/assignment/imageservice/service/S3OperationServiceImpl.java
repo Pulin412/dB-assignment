@@ -1,18 +1,29 @@
 package com.db.assignment.imageservice.service;
 
+import com.db.assignment.imageservice.exception.CustomS3Exception;
+import com.db.assignment.imageservice.model.ExternalImageDto;
+import com.db.assignment.imageservice.model.ExternalImageResponseDto;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.enums.PreDefImageTypesEnum;
+import com.db.assignment.imageservice.repository.S3StoreRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class S3OperationServiceImpl implements S3OperationService{
 
+    private final S3StoreRepo s3StoreRepo;
+
     private static final Logger log = LoggerFactory.getLogger(S3OperationServiceImpl.class);
+
+    public S3OperationServiceImpl(S3StoreRepo s3StoreRepo) {
+        this.s3StoreRepo = s3StoreRepo;
+    }
 
     /*
         Utility Method to create URL to match the AWS directory strategy
@@ -67,5 +78,46 @@ public class S3OperationServiceImpl implements S3OperationService{
         String[] arr = s3Url.split("/");
         String preDefType = arr[1];
         return s3Url.replace(preDefType, PreDefImageTypesEnum.ORIGINAL.name().toLowerCase());
+    }
+
+    public Optional<ExternalImageResponseDto> getOptimisedImageFromS3(ExternalImageDto externalImageDto) {
+        // Call to the external system to fetch from S3 [mocked_externalS3]
+        return s3StoreRepo.getOptimisedImageFromS3(externalImageDto);
+    }
+
+    @Override
+    public Optional<ExternalImageResponseDto> getOriginalImageFromS3(ExternalImageDto externalImageDto) {
+        // Call to the external system to fetch from S3 [mocked_externalS3]
+        return s3StoreRepo.getOriginalImageFromS3(externalImageDto);
+    }
+
+    @Override
+    public Optional<ExternalImageResponseDto> save(ExternalImageDto externalImageDto) throws CustomS3Exception {
+        // Call to the external system to save in S3 [mocked_externalS3]
+//        throw new CustomS3Exception("error");
+        return s3StoreRepo.save(externalImageDto);
+    }
+
+    @Override
+    public boolean flushImage(ExternalImageDto externalImageDto) {
+        // Call to the external system to delete from S3 [mocked_externalS3]
+        return s3StoreRepo.flushImage(externalImageDto);
+    }
+
+    @Override
+    public List<String> getBuckets() {
+        // Call to the external system to fetch from S3 [mocked_externalS3]
+        return s3StoreRepo.getBuckets();
+    }
+
+    @Override
+    public boolean doesObjectExist(ExternalImageDto externalImageDto) {
+        // Call to the external system to check from S3 [mocked_externalS3]
+        return s3StoreRepo.doesObjectExist(externalImageDto);
+    }
+
+    @Override
+    public Optional<ExternalImageResponseDto> optimise(ExternalImageDto externalImageDto) {
+        return s3StoreRepo.optimise(externalImageDto);
     }
 }

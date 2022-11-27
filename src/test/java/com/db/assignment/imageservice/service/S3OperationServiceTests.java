@@ -1,12 +1,13 @@
 package com.db.assignment.imageservice.service;
 
 import com.db.assignment.imageservice.model.ImageRequestDto;
+import com.db.assignment.imageservice.repository.S3StoreRepoImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class S3OperationServiceTests {
 
-    private final S3OperationServiceImpl s3OperationService = new S3OperationServiceImpl();
+    private final S3OperationServiceImpl s3OperationService = new S3OperationServiceImpl(new S3StoreRepoImpl());
 
     @Test
     public void whenImageTypeAndReferencePassed_thenReturnValidBucketDirectory(){
