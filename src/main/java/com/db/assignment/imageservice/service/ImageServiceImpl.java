@@ -8,7 +8,6 @@ import com.db.assignment.imageservice.model.ExternalImageResponseDto;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
 import com.db.assignment.imageservice.model.enums.ImageTypeStrategyNameEnum;
-import com.db.assignment.imageservice.model.enums.PreDefImageTypesEnum;
 import com.db.assignment.imageservice.model.imageType.ImageType;
 import com.db.assignment.imageservice.repository.SourceStoreRepo;
 import com.db.assignment.imageservice.service.imageTypeStrategy.ImageTypeStrategy;
@@ -162,7 +161,7 @@ public class ImageServiceImpl implements ImageService{
         log.debug("IMAGE_SERVICE ::::: flush ::::: Flushing image with path {} ", imagePath);
 
         try{
-            if(!preDefinedType.equalsIgnoreCase(PreDefImageTypesEnum.ORIGINAL.toString())){
+            if(!preDefinedType.equalsIgnoreCase(ImageTypeStrategyNameEnum.ORIGINAL.toString())){
                 log.debug("IMAGE_SERVICE ::::: flush ::::: Flushing compressed image with preDefinedType {}", preDefinedType);
                 return s3OperationService.flushImage(ExternalImageDto.builder().s3ObjectUrl(imagePath).build());
             } else {

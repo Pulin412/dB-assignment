@@ -4,7 +4,7 @@ import com.db.assignment.imageservice.exception.CustomS3Exception;
 import com.db.assignment.imageservice.model.ExternalImageDto;
 import com.db.assignment.imageservice.model.ExternalImageResponseDto;
 import com.db.assignment.imageservice.model.ImageRequestDto;
-import com.db.assignment.imageservice.model.enums.PreDefImageTypesEnum;
+import com.db.assignment.imageservice.model.enums.ImageTypeStrategyNameEnum;
 import com.db.assignment.imageservice.repository.S3StoreRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +35,12 @@ public class S3OperationServiceImpl implements S3OperationService{
         String reference = imageRequestDto.getReference();
         StringBuilder sb = new StringBuilder("~/");
 
-        Optional<PreDefImageTypesEnum> optionalMatch = Arrays.stream(PreDefImageTypesEnum.values())
+        Optional<ImageTypeStrategyNameEnum> optionalMatch = Arrays.stream(ImageTypeStrategyNameEnum.values())
                 .filter(val -> val.name().equalsIgnoreCase((imageRequestDto.getPreDefinedType())))
                 .findFirst();
 
         if(optionalMatch.isEmpty())
-            preDefinedType = PreDefImageTypesEnum.ORIGINAL.name().toLowerCase();
+            preDefinedType = ImageTypeStrategyNameEnum.ORIGINAL.name().toLowerCase();
 
         sb.append(preDefinedType);
         sb.append("/");
@@ -77,7 +77,7 @@ public class S3OperationServiceImpl implements S3OperationService{
     public String getOriginalImageURL(String s3Url) {
         String[] arr = s3Url.split("/");
         String preDefType = arr[1];
-        return s3Url.replace(preDefType, PreDefImageTypesEnum.ORIGINAL.name().toLowerCase());
+        return s3Url.replace(preDefType, ImageTypeStrategyNameEnum.ORIGINAL.name().toLowerCase());
     }
 
     public Optional<ExternalImageResponseDto> getOptimisedImageFromS3(ExternalImageDto externalImageDto) {
