@@ -131,6 +131,10 @@ A unified exception handling is implemented for the whole application using `Res
     - [ImageType](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/imageType/ImageType.java) is used as an Abstract case with properties common to all ImageType.
     - Implementation for the ImageType Abstract class are added such as [Thumbnail_ImageType](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/imageType/Thumbnail_ImageType.java).
 
+### Unit test cases
+
+- A few [Junits](https://github.com/Pulin412/dB-assignment/tree/main/src/test/java/com/db/assignment/imageservice/service) are written for ImageService and S3OperationService methods using `Mockito`.
+
 ## Steps to run the API
 
 - Use the Spring boot maven plugin to run the application - 

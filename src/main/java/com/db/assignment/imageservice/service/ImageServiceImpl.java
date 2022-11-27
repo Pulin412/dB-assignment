@@ -7,6 +7,7 @@ import com.db.assignment.imageservice.model.ExternalImageDto;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
 import com.db.assignment.imageservice.model.enums.ImageTypeStrategyNameEnum;
+import com.db.assignment.imageservice.model.enums.PreDefImageTypesEnum;
 import com.db.assignment.imageservice.model.imageType.ImageType;
 import com.db.assignment.imageservice.repository.S3StoreRepo;
 import com.db.assignment.imageservice.repository.SourceStoreRepo;
@@ -95,6 +96,8 @@ public class ImageServiceImpl implements ImageService{
             log.debug("IMAGE_SERVICE ::::: show ::::: Compressing the Original Image {} ", original_Object_Url);
             s3_Optimised_Url = s3StoreRepo.optimise(ExternalImageDto.builder().s3ObjectUrl(original_Object_Url).imageRequestDto(imageRequestDto).build());
 
+        } catch (ImageNotFoundException ex){
+            throw new ImageNotFoundException(ex.getMessage());
         } catch (Exception ex){
             log.error("IMAGE_SERVICE ::::: show ::::: System issues, Image not found. Try again later");
             throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_GENERIC);
@@ -114,7 +117,7 @@ public class ImageServiceImpl implements ImageService{
     @Recover
     public ImageResponseDto recover(CustomS3Exception e, ImageRequestDto imageRequestDto){
         log.error("IMAGE_SERVICE ::::: show ::::: Issue in connecting with external systems, quitting..");
-        return ImageResponseDto.builder().build();
+        throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_IMAGE_NOT_FOUND);
     }
 
     @Override
@@ -134,7 +137,7 @@ public class ImageServiceImpl implements ImageService{
         log.debug("IMAGE_SERVICE ::::: flush ::::: Flushing image with path {} ", imagePath);
 
         try{
-            if(!preDefinedType.equalsIgnoreCase("original")){
+            if(!preDefinedType.equalsIgnoreCase(PreDefImageTypesEnum.ORIGINAL.toString())){
                 log.debug("IMAGE_SERVICE ::::: flush ::::: Flushing compressed image with preDefinedType {}", preDefinedType);
                 return s3StoreRepo.flushImage(ExternalImageDto.builder().s3ObjectUrl(imagePath).build());
             } else {
@@ -186,7 +189,7 @@ public class ImageServiceImpl implements ImageService{
 
         //validate reference is present; add a regex to validate the pattern
         if(imageRequestDto.getReference() == null) {
-            log.debug("IMAGE_SERVICE ::::: validate :::::: file Name not valid");
+            log.info("IMAGE_SERVICE ::::: validate :::::: file Name not valid");
             throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_VALIDATE_REFERENCE);
         }
     }
@@ -199,7 +202,7 @@ public class ImageServiceImpl implements ImageService{
                 throw new Exception();
             return imageTypeStrategy.getImageType();
         } catch (Exception ex){
-            log.error("IMAGE_SERVICE ::::: Pre defined type {} not valid", imageType);
+            log.info("IMAGE_SERVICE ::::: Pre defined type {} not valid", imageType);
             throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_INVALID_PRE_DEFINED_TYPE);
         }
     }

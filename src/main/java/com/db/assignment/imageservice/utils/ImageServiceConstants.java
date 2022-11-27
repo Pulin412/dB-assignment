@@ -8,6 +8,6 @@ public class ImageServiceConstants {
     public static final String EXCEPTION_MESSAGE_FLUSH = "System issue while deleting image(s). Try again later";
     public static final String EXCEPTION_MESSAGE_VALIDATE_PRE_DEFINED_TYPE = "Wrong details";
     public static final String EXCEPTION_MESSAGE_VALIDATE_REFERENCE = "Reference not found";
-    public static final String EXCEPTION_MESSAGE_IMAGE_NOT_FOUND = "Image not found";
+    public static final String EXCEPTION_MESSAGE_IMAGE_NOT_FOUND = "Issue in connecting with external systems, quitting..";
     public static final String EXCEPTION_MESSAGE_INVALID_PRE_DEFINED_TYPE = "Pre defined type not valid";
 }
