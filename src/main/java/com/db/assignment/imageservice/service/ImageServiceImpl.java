@@ -29,6 +29,8 @@ import java.util.Optional;
 public class ImageServiceImpl implements ImageService{
 
     private final SourceStoreRepo sourceStoreRepo;
+
+    //TODO -  add one more layer to localSourceService which talks to s3OperationService
     private final S3OperationService s3OperationService;
     private final ImageTypeStrategyFactory imageTypeStrategyFactory;
     private final Logger log = LoggerFactory.getLogger(ImageServiceImpl.class);
@@ -212,14 +214,12 @@ public class ImageServiceImpl implements ImageService{
 
     private ImageType createImageType(String imageType){
 
-        try{
-            ImageTypeStrategy imageTypeStrategy = imageTypeStrategyFactory.findStrategy(ImageTypeStrategyNameEnum.valueOf(imageType.toUpperCase()));
-            if(imageTypeStrategy == null)
-                throw new Exception();
-            return imageTypeStrategy.getImageType();
-        } catch (Exception ex){
+        ImageTypeStrategy imageTypeStrategy = imageTypeStrategyFactory.findStrategy(ImageTypeStrategyNameEnum.valueOf(imageType.toUpperCase()));
+        // TODO CHECK ERROR HERE
+        if(imageTypeStrategy == null){
             log.info("IMAGE_SERVICE ::::: Pre defined type {} not valid", imageType);
             throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_INVALID_PRE_DEFINED_TYPE);
         }
+        return imageTypeStrategy.getImageType();
     }
 }

@@ -16,12 +16,7 @@ public class ImageType_Thumbnail_Strategy implements ImageTypeStrategy{
     @Override
     public ImageType getImageType() {
         return Thumbnail_ImageType.builder()
-                .height(thumbnailConfig.getHeight())
-                .width(thumbnailConfig.getWidth())
-                .quality(thumbnailConfig.getQuality())
-                .fillColor(thumbnailConfig.getFillColor())
-                .scaleType(thumbnailConfig.getScaleType())
-                .imageExtension(thumbnailConfig.getImageExtension())
+                .imageConfigContainer(thumbnailConfig.getImageConfigContainer())
                 .build();
     }
 

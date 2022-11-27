@@ -9,10 +9,5 @@ import lombok.experimental.SuperBuilder;
 @ToString
 public abstract class ImageType {
 
-    private int height;
-    private int width;
-    private int quality;
-    private ScaleTypeEnum scaleType;
-    private String fillColor;
-    private ImageExtensionEnum imageExtension;
+    private ImageConfigContainer imageConfigContainer;
 }

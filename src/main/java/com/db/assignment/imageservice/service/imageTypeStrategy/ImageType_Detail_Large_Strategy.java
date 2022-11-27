@@ -16,12 +16,7 @@ public class ImageType_Detail_Large_Strategy implements ImageTypeStrategy{
     @Override
     public ImageType getImageType() {
         return DetailLarge_ImageType.builder()
-                .height(detailLargeConfig.getHeight())
-                .width(detailLargeConfig.getWidth())
-                .quality(detailLargeConfig.getQuality())
-                .fillColor(detailLargeConfig.getFillColor())
-                .scaleType(detailLargeConfig.getScaleType())
-                .imageExtension(detailLargeConfig.getImageExtension())
+                .imageConfigContainer(detailLargeConfig.getImageConfigContainer())
                 .build();
     }
 

@@ -16,12 +16,7 @@ public class ImageType_Portrait_Strategy implements ImageTypeStrategy{
     @Override
     public ImageType getImageType() {
         return Portrait_ImageType.builder()
-                .height(portraitConfig.getHeight())
-                .width(portraitConfig.getWidth())
-                .quality(portraitConfig.getQuality())
-                .fillColor(portraitConfig.getFillColor())
-                .scaleType(portraitConfig.getScaleType())
-                .imageExtension(portraitConfig.getImageExtension())
+                .imageConfigContainer(portraitConfig.getImageConfigContainer())
                 .build();
     }
 
