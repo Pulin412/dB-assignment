@@ -14,8 +14,5 @@ import java.util.Optional;
 public interface ImageService {
 
     ImageResponseDto getImage(ImageRequestDto imageRequestDto) throws IOException;
-
     boolean flush(String preDefinedType, String reference);
-
-    Optional<ExternalImageResponseDto> save(ExternalImageDto externalImageDto);
 }

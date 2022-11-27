@@ -136,10 +136,6 @@ public class ImageServiceImpl implements ImageService{
                 .build();
     }
 
-    public Optional<ExternalImageResponseDto> save(ExternalImageDto externalImageDto) throws CustomS3Exception {
-        return s3OperationService.save(externalImageDto);
-    }
-
     @Override
     public boolean flush(String preDefinedType, String reference) {
 
