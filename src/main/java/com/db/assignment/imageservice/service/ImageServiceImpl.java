@@ -1,6 +1,5 @@
 package com.db.assignment.imageservice.service;
 
-import com.db.assignment.imageservice.exception.CustomS3Exception;
 import com.db.assignment.imageservice.exception.GenericException;
 import com.db.assignment.imageservice.exception.ImageNotFoundException;
 import com.db.assignment.imageservice.model.ExternalImageDto;
@@ -16,9 +15,6 @@ import com.db.assignment.imageservice.utils.ImageServiceConstants;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -44,16 +40,16 @@ public class ImageServiceImpl implements ImageService{
     @Override
     public ImageResponseDto getImage(ImageRequestDto imageRequestDto) {
 
-        // 1. Validate the incoming request
-        validate(imageRequestDto);
-        log.debug("IMAGE_SERVICE ::::: getImage ::::: validate ::::: Incoming request validated");
-
         String optimised_Object_From_S3_Url = "";
         String s3_Optimised_Url ="";
         String original_Object_Url = "";
         Optional<ExternalImageResponseDto> optionalExternalImageResponseDto;
 
         try {
+            // 1. Validate the incoming request
+            validate(imageRequestDto);
+            log.debug("IMAGE_SERVICE ::::: getImage ::::: validate ::::: Incoming request validated");
+
             // 2. Create the S3 URL to access/store the optimised image
             String object_For_S3_Url = s3OperationService.createS3Url(imageRequestDto);
             log.debug("IMAGE_SERVICE ::::: getImage ::::: Fetching Compressed Image {} from S3 located at - {} ", imageRequestDto.getImageMetaData().getImageId(), object_For_S3_Url);
@@ -141,20 +137,20 @@ public class ImageServiceImpl implements ImageService{
     @Override
     public boolean flush(String preDefinedType, String reference) {
 
-        // 1. Validate the incoming request
-        validateObject(preDefinedType, reference);
-        log.debug("IMAGE_SERVICE ::::: flush :::: validate ::::: Incoming request validated");
-
-        StringBuilder objectPath = new StringBuilder("/" + preDefinedType + "/");
-
-        /* check preDefinedType:
-                'Original' : Find with file name in the buckets
-                Others : Create the bucket name using file Name and pass the URL for deletion.
-         */
-        String imagePath = s3OperationService.getBucketPathFromFileName(reference, objectPath).toString();
-        log.debug("IMAGE_SERVICE ::::: flush ::::: Flushing image with path {} ", imagePath);
-
         try{
+            // 1. Validate the incoming request
+            validateRequestInputs(preDefinedType, reference);
+            log.debug("IMAGE_SERVICE ::::: flush :::: validate ::::: Incoming request validated");
+
+            StringBuilder objectPath = new StringBuilder("/" + preDefinedType + "/");
+
+            /* check preDefinedType:
+                    'Original' : Find with file name in the buckets
+                    Others : Create the bucket name using file Name and pass the URL for deletion.
+             */
+            String imagePath = s3OperationService.getBucketPathFromFileName(reference, objectPath).toString();
+            log.debug("IMAGE_SERVICE ::::: flush ::::: Flushing image with path {} ", imagePath);
+
             if(!preDefinedType.equalsIgnoreCase(ImageTypeStrategyNameEnum.ORIGINAL.toString())){
                 log.debug("IMAGE_SERVICE ::::: flush ::::: Flushing compressed image with preDefinedType {}", preDefinedType);
                 return s3OperationService.flushImage(ExternalImageDto.builder().s3ObjectUrl(imagePath).build());
@@ -181,18 +177,18 @@ public class ImageServiceImpl implements ImageService{
         return true;
     }
 
-    private void validateObject(String preDefinedType, String reference) {
+    private void validateRequestInputs(String preDefinedType, String reference) {
         Optional<ImageTypeStrategyNameEnum> optionalMatch = Arrays.stream(ImageTypeStrategyNameEnum.values())
                 .filter(val -> val.name().equalsIgnoreCase((preDefinedType)))
                 .findFirst();
 
         if(optionalMatch.isEmpty()){
             log.error("IMAGE_SERVICE ::::: validate :::::: {} not valid", preDefinedType);
-            throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_VALIDATE_PRE_DEFINED_TYPE);
+            throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_INVALID_PRE_DEFINED_TYPE);
         }
 
         //validate reference is present; add a regex to validate the pattern
-        if(reference == null) {
+        if(Strings.isEmpty(reference)) {
             log.error("IMAGE_SERVICE ::::: validate :::::: file Name not valid");
             throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_VALIDATE_REFERENCE);
         }
@@ -202,23 +198,17 @@ public class ImageServiceImpl implements ImageService{
     private void validate(ImageRequestDto imageRequestDto){
 
         //validate and create preDefinedImageType object
+        validateRequestInputs(imageRequestDto.getPreDefinedType(), imageRequestDto.getReference());
+
         imageRequestDto.setImageType(createImageType(imageRequestDto.getPreDefinedType()));
         log.debug("IMAGE SERVICE :::::: validate :::::: Set predefined Image Type with details {} ", imageRequestDto.getImageType());
-
-        //validate reference is present; add a regex to validate the pattern
-        if(imageRequestDto.getReference() == null) {
-            log.info("IMAGE_SERVICE ::::: validate :::::: file Name not valid");
-            throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_VALIDATE_REFERENCE);
-        }
     }
 
     private ImageType createImageType(String imageType){
 
         ImageTypeStrategy imageTypeStrategy = imageTypeStrategyFactory.findStrategy(ImageTypeStrategyNameEnum.valueOf(imageType.toUpperCase()));
-        // TODO CHECK ERROR HERE
         if(imageTypeStrategy == null){
-            log.info("IMAGE_SERVICE ::::: Pre defined type {} not valid", imageType);
-            throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_INVALID_PRE_DEFINED_TYPE);
+            throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_GENERAL);
         }
         return imageTypeStrategy.getImageType();
     }

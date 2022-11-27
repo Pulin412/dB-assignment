@@ -8,6 +8,7 @@ import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.enums.ImageExtensionEnum;
 import com.db.assignment.imageservice.model.enums.ImageTypeStrategyNameEnum;
 import com.db.assignment.imageservice.model.enums.ScaleTypeEnum;
+import com.db.assignment.imageservice.model.imageType.ImageConfigContainer;
 import com.db.assignment.imageservice.model.imageType.ImageType;
 import com.db.assignment.imageservice.model.imageType.Thumbnail_ImageType;
 import com.db.assignment.imageservice.repository.SourceStoreRepo;
@@ -34,7 +35,6 @@ public class ImageServiceUnitTests {
     private S3OperationService s3OperationService;
     @Mock
     private ImageTypeStrategyFactory imageTypeStrategyFactory;
-
 
     @InjectMocks
     private ImageServiceImpl imageService;
@@ -101,12 +101,14 @@ public class ImageServiceUnitTests {
             @Override
             public ImageType getImageType() {
                 return Thumbnail_ImageType.builder()
-                        .height(10)
-                        .width(20)
-                        .quality(99)
-                        .fillColor("0x45E213")
-                        .scaleType(ScaleTypeEnum.CROP)
-                        .imageExtension(ImageExtensionEnum.JPG)
+                        .imageConfigContainer(ImageConfigContainer.builder()
+                                .height(10)
+                                .width(20)
+                                .quality(99)
+                                .fillColor("0x45E213")
+                                .scaleType(ScaleTypeEnum.CROP)
+                                .imageExtension(ImageExtensionEnum.JPG)
+                                .build())
                         .build();
             }
 
