@@ -57,6 +57,11 @@ Multiple services are implemented to handle certain functionalities and to isola
                 .build());
   ```   
 
+- [LocalStoreService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/service/LocalStoreService.java)
+
+  - This is the service that acts as an interface between local storages connecting to the API.
+  - In the current implementation, it connects with the S3OperationService to handle the S3 related operations.
+
 - [S3OperationService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/service/S3OperationService.java)
 
     - This service is responsible for operations related with S3 AWS service.

@@ -32,7 +32,7 @@ public class ImageServiceUnitTests {
     @Mock
     private SourceStoreRepo sourceStoreRepo;
     @Mock
-    private S3OperationService s3OperationService;
+    private LocalStoreService localStoreService;
     @Mock
     private ImageTypeStrategyFactory imageTypeStrategyFactory;
 
@@ -59,39 +59,39 @@ public class ImageServiceUnitTests {
     @Test
     public void whenValidRequestAndOptimisedImagePresentInS3_thenReturnOptimisedImageUrl(){
         when(imageTypeStrategyFactory.findStrategy(Mockito.any())).thenReturn(getThumbnailStrategy());
-        when(s3OperationService.getOptimisedImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("/optimised/image"));
+        when(localStoreService.getOptimisedImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("/optimised/image"));
         Assertions.assertEquals("/optimised/image", imageService.getImage(getValidRequest()).getS3BucketUrl());
     }
 
     @Test
     public void whenOptimisedImageNotPresentButOriginalImagePresentInS3_thenOptimiseOriginalImageAndStoreInS3ThenReturn(){
         when(imageTypeStrategyFactory.findStrategy(Mockito.any())).thenReturn(getThumbnailStrategy());
-        when(s3OperationService.getOptimisedImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto(""));
-        when(s3OperationService.getOriginalImageURL(Mockito.any())).thenReturn("/url/to/fetch/from/s3");
-        when(s3OperationService.getOriginalImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("/original/from/s3"));
-        when(s3OperationService.optimise(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("/optimised/from/s3"));
-        when(s3OperationService.save(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("saved/optimised/from/s3"));
+        when(localStoreService.getOptimisedImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto(""));
+        when(localStoreService.getOriginalImageURL(Mockito.any())).thenReturn("/url/to/fetch/from/s3");
+        when(localStoreService.getOriginalImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("/original/from/s3"));
+        when(localStoreService.optimise(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("/optimised/from/s3"));
+        when(localStoreService.save(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("saved/optimised/from/s3"));
         Assertions.assertEquals("saved/optimised/from/s3", imageService.getImage(getValidRequest()).getS3BucketUrl());
     }
 
     @Test
     public void whenOriginalImageNotPresentInS3ButPresentInSource_thenDownloadAndOptimiseAndReturnOriginalImageUrlFromSource(){
         when(imageTypeStrategyFactory.findStrategy(Mockito.any())).thenReturn(getThumbnailStrategy());
-        when(s3OperationService.getOptimisedImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto(""));
-        when(s3OperationService.getOriginalImageURL(Mockito.any())).thenReturn("/url/to/fetch/from/s3");
-        when(s3OperationService.getOriginalImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto(""));
+        when(localStoreService.getOptimisedImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto(""));
+        when(localStoreService.getOriginalImageURL(Mockito.any())).thenReturn("/url/to/fetch/from/s3");
+        when(localStoreService.getOriginalImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto(""));
         when(sourceStoreRepo.getOriginalImageFromSource(Mockito.any())).thenReturn("/optimised/from/source");
-        when(s3OperationService.optimise(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("/optimised/from/source"));
-        when(s3OperationService.save(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("saved/optimised/from/source"));
+        when(localStoreService.optimise(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("/optimised/from/source"));
+        when(localStoreService.save(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto("saved/optimised/from/source"));
         Assertions.assertEquals("saved/optimised/from/source", imageService.getImage(getValidRequest()).getS3BucketUrl());
     }
 
     @Test
     public void whenOriginalImageNotPresentInS3AndNotPresentInSource_thenThrowImageNotFoundException(){
         when(imageTypeStrategyFactory.findStrategy(Mockito.any())).thenReturn(getThumbnailStrategy());
-        when(s3OperationService.getOptimisedImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto(""));
-        when(s3OperationService.getOriginalImageURL(Mockito.any())).thenReturn("/url/to/fetch/from/s3");
-        when(s3OperationService.getOriginalImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto(""));
+        when(localStoreService.getOptimisedImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto(""));
+        when(localStoreService.getOriginalImageURL(Mockito.any())).thenReturn("/url/to/fetch/from/s3");
+        when(localStoreService.getOriginalImageFromS3(Mockito.any())).thenReturn(getOptionalExternalImageResponseDto(""));
         when(sourceStoreRepo.getOriginalImageFromSource(Mockito.any())).thenReturn("");
         Assertions.assertThrows(ImageNotFoundException.class, ()-> imageService.getImage(getValidRequest()));
     }
