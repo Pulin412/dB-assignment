@@ -169,6 +169,10 @@ public class ImageServiceImpl implements ImageService{
                     }
                 }
             }
+        } catch (ImageNotFoundException ex){
+            throw new ImageNotFoundException(ex.getMessage());
+        } catch (GenericException ex) {
+            throw new GenericException(ex.getMessage());
         } catch (Exception ex){
             log.error("IMAGE_SERVICE ::::: flush ::::: System issue while deleting image(s). Try again later");
             throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_FLUSH);
