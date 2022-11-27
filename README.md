@@ -31,6 +31,7 @@ Incoming Request is received by the `ImageController.class`. There are 2 endpoin
 
 ```
  Fetch - GET localhost:8080/image/show/thumbnail/bb?reference=/somedir/anotherdir/abcdef.jpg
+ Fetch - GET localhost:8080/image/show/thumbnail?reference=/somedir/anotherdir/abcdef.jpg
  Flush - DELETE localhost:8080/image/flush/thumbnail?reference=0277901000150001_pro_mod_frt_02_1108_1528_1059540.jpg
 ```
 
@@ -100,12 +101,6 @@ Dummy repositories are present in the code to show the place to put the connecti
 
     - This repository is responsible to connect to S3 service and perform CRUD and other operations related to objects (images in this case).
 
-- [SourceStoreRepo](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/repository/SourceStoreRepo.java)
-
-    - This repository is responsible to connect to the Gateway `ImageGatewayService` and get the response.
-    - This is additional layer before the Gateway, in case other operations/implementations are required before the response is passed back to the service.
-
-
 ### Configurations
 
 - [AwsS3Config](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/config/AwsS3Config.java) 
@@ -171,6 +166,7 @@ Access the below-mentioned sample URLs to hit the endpoints -
 Fetch Image - 
 ```html
     curl -X GET 'http://localhost:8080/image/show/detail_large/bb?reference=%2Fsomedir%2Fanotherdir%2Fabcdef.jpg'
+    curl -X GET 'http://localhost:8080/image/show/detail_large?reference=%2Fsomedir%2Fanotherdir%2Fabcdef.jpg'
 ```
 
 Flush Image -

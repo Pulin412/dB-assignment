@@ -14,7 +14,7 @@
         </layout>
     </appender>
 
-    <appender name="customDb" class="com.db.assignment.imageservice.config.CustomDbAppender"/>
+    <appender name="customDb" class="com.db.assignment.image_service.config.CustomDbAppender"/>
 
     <root level="info">
         <appender-ref ref="Console" />
