@@ -39,7 +39,7 @@ Incoming Request is received by the `ImageController.class`. There are 2 endpoin
 
 Multiple services are implemented to handle certain functionalities and to isolate the responsibilities among services.
 
-- [ImageService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/service/ImageService.java):
+- [ImageService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/service/ImageService.java):
 
     - Main service responsible to fetch and flush the optimised images back to the controller layer.
     - Interacts with other services to connect to S3 or other external systems.
@@ -49,7 +49,7 @@ Multiple services are implemented to handle certain functionalities and to isola
     retry.maxAttempts=1
     retry.maxDelay=200 
   ```
-  - To test the retry functionality, comment the mocked response with the thrown exception [here](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/repository/S3StoreRepoImpl.java#L66)
+  - To test the retry functionality, comment the mocked response with the thrown exception [here](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/repository/S3StoreRepoImpl.java#L66)
   ```java
         //  throw new CustomS3Exception("error");
             return Optional.of(ExternalImageResponseDto.builder()
@@ -58,23 +58,23 @@ Multiple services are implemented to handle certain functionalities and to isola
                 .build());
   ```   
 
-- [LocalStoreService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/service/LocalStoreService.java)
+- [LocalStoreService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/service/LocalStoreService.java)
 
   - This is the service that acts as an interface between local storages connecting to the API.
   - In the current implementation, it connects with the S3OperationService to handle the S3 related operations.
 
-- [S3OperationService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/service/S3OperationService.java)
+- [S3OperationService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/service/S3OperationService.java)
 
     - This service is responsible for operations related with S3 AWS service.
     - This service can be used to add more operations like listing objects from buckets, listing buckets etc.
 
-- [ImageGatewayService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/service/ImageGatewayService.java)
+- [ImageGatewayService](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/service/ImageGatewayService.java)
 
     - This is the Gateway service used to connect to external services like `source` system.
     - This service can expose methods to map the response from the external services to internal services usable object with minimum required attributes.
     - This service can also handle other functionalities related to connection with the external systems for eg. Security, Authorization while connecting.
 
-- [ImageTypeStrategy](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/service/imageTypeStrategy/ImageTypeStrategy.java)
+- [ImageTypeStrategy](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/service/image_type_strategy/ImageTypeStrategy.java)
 
     - This is the strategy interface used within the application to get the appropriate Pre-defined Image Type and related configuration.
   ```java
@@ -97,27 +97,27 @@ Multiple services are implemented to handle certain functionalities and to isola
 
 Dummy repositories are present in the code to show the place to put the connection with Databases/services in future.
 
-- [S3StoreRepo](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/repository/S3StoreRepo.java)
+- [S3StoreRepo](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/repository/S3StoreRepo.java)
 
     - This repository is responsible to connect to S3 service and perform CRUD and other operations related to objects (images in this case).
 
 ### Configurations
 
-- [AwsS3Config](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/config/AwsS3Config.java) 
+- [AwsS3Config](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/config/AwsS3Config.java) 
 
     - This configuration bean is required when a connection is required with AWS S3 service.
     - All the connection related details can be added here and can be used by the `S2StoreRepo` to do operations.
 
-- [RetryConfig](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/config/RetryConfig.java)
+- [RetryConfig](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/config/RetryConfig.java)
 
     - This configuration bean is used to implement the Retry mechanism on failure to store object in S3 and if `CustomS3Exception` is received.
     - This uses the properties from `retryConfig.properties` to control the number of retries and gap between the retries.
 
-- [DefaultListenerSupport](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/config/DefaultListenerSupport.java)
+- [DefaultListenerSupport](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/config/DefaultListenerSupport.java)
 
     - This provides the callbacks upon retries and is used to log the details while retrying the operation. 
 
-- [ImageTypes](https://github.com/Pulin412/dB-assignment/tree/main/src/main/java/com/db/assignment/imageservice/config/ImageTypes)
+- [ImageTypes](https://github.com/Pulin412/dB-assignment/tree/main/src/main/java/com/db/assignment/image_service/config/Image_types)
 
     - These configurations are available with the pre-configured properties for each Pre-defined Image type from application properties.
 
@@ -126,7 +126,7 @@ Dummy repositories are present in the code to show the place to put the connecti
 
 A unified exception handling is implemented for the whole application using `RestControllerAdvice`
 
-- [GlobalExceptionController](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/exception/GlobalExceptionController.java)
+- [GlobalExceptionController](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/exception/GlobalExceptionController.java)
 
     - This class handles all the custom exceptions thrown by the application.
     - If any custom Exception is added in future, can be added here for the entire application.
@@ -137,21 +137,21 @@ A unified exception handling is implemented for the whole application using `Res
 
 ### Models and DTOs
 
-- [ImageRequestDTO](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ImageRequestDto.java) and [ImageResponseDTO](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ImageResponseDto.java) are the main DTOs to handle the data transfer between Controller and ImageService.
-- [ImageMetaData](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ImageMetaData.java) is present for future use. Image metadata can be saved in a NoSql Database for quick access.
-- [ExternalImageDto](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ExternalImageDto.java) and [ExternalImageResponseDto](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/ExternalImageResponseDto.java) are used to communicate between ImageService and S3OperationService and SourceStoreRepo. We can separate the DTOs for these two services but since its a dummy call, both calls use the same DTO.
+- [ImageRequestDTO](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/model/ImageRequestDto.java) and [ImageResponseDTO](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/model/ImageResponseDto.java) are the main DTOs to handle the data transfer between Controller and ImageService.
+- [ImageMetaData](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/model/ImageMetaData.java) is present for future use. Image metadata can be saved in a NoSql Database for quick access.
+- [ExternalImageDto](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/model/ExternalImageDto.java) and [ExternalImageResponseDto](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/model/ExternalImageResponseDto.java) are used to communicate between ImageService and S3OperationService and SourceStoreRepo. We can separate the DTOs for these two services but since its a dummy call, both calls use the same DTO.
 - ImageType
 
-    - [ImageType](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/imageType/ImageType.java) is used as an Abstract class with properties common to all ImageType.
-    - Implementation for the ImageType Abstract class are added such as [Thumbnail_ImageType](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/model/imageType/Thumbnail_ImageType.java).
+    - [ImageType](https://github.com/Pulin412/dB-assignment/tree/main/src/main/java/com/db/assignment/image_service/model/image_type) is used as an Abstract class with properties common to all ImageType.
+    - Implementation for the ImageType Abstract class are added such as [Thumbnail_ImageType](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/model/image_type/ThumbnailImageType.java).
 
 ### Unit test cases
 
-- A few [Junits](https://github.com/Pulin412/dB-assignment/tree/main/src/test/java/com/db/assignment/imageservice/service) are written for ImageService and S3OperationService methods using `Mockito`.
+- A few [Junits](https://github.com/Pulin412/dB-assignment/tree/main/src/test/java/com/db/assignment/image_service/service) are written for ImageService and S3OperationService methods using `Mockito`.
 
 ### Logs Appender
 
-- A dummy [custom](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/imageservice/config/CustomDbAppender.java) DB log appender is implemented as the support for logback DB appender has been removed from log4j due to vulnerabilities [read here](https://logback.qos.ch/news.html#logback.db.1.2.11.1)
+- A dummy [custom](https://github.com/Pulin412/dB-assignment/blob/main/src/main/java/com/db/assignment/image_service/config/CustomDbAppender.java) DB log appender is implemented as the support for logback DB appender has been removed from log4j due to vulnerabilities [read here](https://logback.qos.ch/news.html#logback.db.1.2.11.1)
 
 ## Steps to run the API
 
