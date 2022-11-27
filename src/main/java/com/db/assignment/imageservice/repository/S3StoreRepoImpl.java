@@ -3,12 +3,15 @@ package com.db.assignment.imageservice.repository;
 import com.db.assignment.imageservice.config.AwsS3Config;
 import com.db.assignment.imageservice.exception.CustomS3Exception;
 import com.db.assignment.imageservice.model.ExternalImageDto;
+import com.db.assignment.imageservice.model.ExternalImageResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class S3StoreRepoImpl implements S3StoreRepo {
@@ -40,22 +43,31 @@ public class S3StoreRepoImpl implements S3StoreRepo {
     @Autowired
     private AwsS3Config awsS3Config;
 
-    public String getOptimisedImageFromS3(ExternalImageDto externalImageDto) {
+    public Optional<ExternalImageResponseDto> getOptimisedImageFromS3(ExternalImageDto externalImageDto) {
         // Call to the external system to fetch from S3 [mocked_externalS3]
-        return mock_response_getOptimisedImageFromS3;
+        return Optional.of(ExternalImageResponseDto.builder()
+                .imageId(UUID.randomUUID())
+                .sourceImageUrl(mock_response_getOptimisedImageFromS3)
+                .build());
     }
 
     @Override
-    public String getOriginalImageFromS3(ExternalImageDto externalImageDto) {
+    public Optional<ExternalImageResponseDto> getOriginalImageFromS3(ExternalImageDto externalImageDto) {
         // Call to the external system to fetch from S3 [mocked_externalS3]
-        return mock_response_getOriginalImageFromS3;
+        return Optional.of(ExternalImageResponseDto.builder()
+                .imageId(UUID.randomUUID())
+                .sourceImageUrl(mock_response_getOriginalImageFromS3)
+                .build());
     }
 
     @Override
-    public String save(ExternalImageDto externalImageDto) throws CustomS3Exception {
+    public Optional<ExternalImageResponseDto> save(ExternalImageDto externalImageDto) throws CustomS3Exception {
         // Call to the external system to save in S3 [mocked_externalS3]
 //        throw new CustomS3Exception("error");
-        return mock_response_save;
+        return Optional.of(ExternalImageResponseDto.builder()
+                .imageId(UUID.randomUUID())
+                .sourceImageUrl(mock_response_save)
+                .build());
     }
 
     @Override
@@ -77,7 +89,10 @@ public class S3StoreRepoImpl implements S3StoreRepo {
     }
 
     @Override
-    public String optimise(ExternalImageDto externalImageDto) {
-        return mock_response_optimise;
+    public Optional<ExternalImageResponseDto> optimise(ExternalImageDto externalImageDto) {
+        return Optional.of(ExternalImageResponseDto.builder()
+                .imageId(UUID.randomUUID())
+                .sourceImageUrl(mock_response_optimise)
+                .build());
     }
 }

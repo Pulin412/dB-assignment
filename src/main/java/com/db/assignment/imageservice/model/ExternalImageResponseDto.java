@@ -13,5 +13,4 @@ public class ExternalImageResponseDto {
 
     private UUID imageId;
     private String sourceImageUrl;
-    private String mockedResponse;
 }

@@ -4,6 +4,7 @@ import com.db.assignment.imageservice.exception.CustomS3Exception;
 import com.db.assignment.imageservice.exception.GenericException;
 import com.db.assignment.imageservice.exception.ImageNotFoundException;
 import com.db.assignment.imageservice.model.ExternalImageDto;
+import com.db.assignment.imageservice.model.ExternalImageResponseDto;
 import com.db.assignment.imageservice.model.ImageRequestDto;
 import com.db.assignment.imageservice.model.ImageResponseDto;
 import com.db.assignment.imageservice.model.enums.ImageTypeStrategyNameEnum;
@@ -50,23 +51,27 @@ public class ImageServiceImpl implements ImageService{
 
         // 1. Validate the incoming request
         validate(imageRequestDto);
-        log.debug("IMAGE_SERVICE ::::: show ::::: validate ::::: Incoming request validated");
+        log.debug("IMAGE_SERVICE ::::: getImage ::::: validate ::::: Incoming request validated");
 
         String optimised_Object_From_S3_Url = "";
         String s3_Optimised_Url ="";
         String original_Object_Url = "";
+        Optional<ExternalImageResponseDto> optionalExternalImageResponseDto;
 
         try {
             // 2. Create the S3 URL to access/store the optimised image
             String object_For_S3_Url = s3OperationService.createS3Url(imageRequestDto);
-            log.debug("IMAGE_SERVICE ::::: show ::::: Fetching Compressed Image {} from S3 located at - {} ", imageRequestDto.getImageMetaData().getImageId(), object_For_S3_Url);
+            log.debug("IMAGE_SERVICE ::::: getImage ::::: Fetching Compressed Image {} from S3 located at - {} ", imageRequestDto.getImageMetaData().getImageId(), object_For_S3_Url);
 
             //3. Get the optimised image from S3 using the URL created at step 2
-            optimised_Object_From_S3_Url = s3StoreRepo.getOptimisedImageFromS3(ExternalImageDto.builder().s3ObjectUrl(object_For_S3_Url).build());
+            optionalExternalImageResponseDto = s3StoreRepo.getOptimisedImageFromS3(ExternalImageDto.builder().s3ObjectUrl(object_For_S3_Url).build());
+            if(optionalExternalImageResponseDto.isPresent()){
+                optimised_Object_From_S3_Url = optionalExternalImageResponseDto.get().getSourceImageUrl();
+            }
 
             // 3a. Optimised image IS present, create and send the response to client
             if(Strings.isNotEmpty(optimised_Object_From_S3_Url)){
-                log.debug("IMAGE_SERVICE ::::: show ::::: Found compressed Image {} at {} ... Returning to client", imageRequestDto.getImageMetaData().getImageId(), optimised_Object_From_S3_Url);
+                log.debug("IMAGE_SERVICE ::::: getImage ::::: Found compressed Image {} at {} ... Returning to client", imageRequestDto.getImageMetaData().getImageId(), optimised_Object_From_S3_Url);
                 return ImageResponseDto.builder()
                         .s3BucketUrl(optimised_Object_From_S3_Url)
                         .build();
@@ -75,40 +80,51 @@ public class ImageServiceImpl implements ImageService{
             // 3b. Optimised image IS NOT present
             // 4. Get the original image from S3 using the same URL created in step 2
             String original_Object_For_S3_Url = s3OperationService.getOriginalImageURL(object_For_S3_Url);
-            log.debug("IMAGE_SERVICE ::::: show ::::: Compressed Image {} not Present in S3, checking Original Image in S3 at {}", imageRequestDto.getImageMetaData().getImageId(), original_Object_For_S3_Url);
-            original_Object_Url = s3StoreRepo.getOriginalImageFromS3(ExternalImageDto.builder().s3ObjectUrl(original_Object_For_S3_Url).build());
+            log.debug("IMAGE_SERVICE ::::: getImage ::::: Compressed Image {} not Present in S3, checking Original Image in S3 at {}", imageRequestDto.getImageMetaData().getImageId(), original_Object_For_S3_Url);
+
+            optionalExternalImageResponseDto = s3StoreRepo.getOriginalImageFromS3(ExternalImageDto.builder().s3ObjectUrl(original_Object_For_S3_Url).build());
+            if(optionalExternalImageResponseDto.isPresent()){
+                original_Object_Url = optionalExternalImageResponseDto.get().getSourceImageUrl();
+            }
 
             // 4a. Original image IS NOT present in S3, download image from the source
             if(Strings.isEmpty(original_Object_Url)){
-                log.debug("IMAGE_SERVICE ::::: show ::::: Original Image {} not found in S3, fetching from the source", imageRequestDto.getImageMetaData().getImageId());
+                log.debug("IMAGE_SERVICE ::::: getImage ::::: Original Image {} not found in S3, fetching from the source", imageRequestDto.getImageMetaData().getImageId());
                 original_Object_Url = sourceStoreRepo.getOriginalImageFromSource(ExternalImageDto.builder().imageRequestDto(imageRequestDto).build());
                 if(Strings.isNotEmpty(original_Object_Url))
-                    log.debug("IMAGE_SERVICE ::::: show ::::: Found Original Image {} at source located at {} ", imageRequestDto.getImageMetaData().getImageId(), original_Object_Url);
+                    log.debug("IMAGE_SERVICE ::::: getImage ::::: Found Original Image {} at source located at {} ", imageRequestDto.getImageMetaData().getImageId(), original_Object_Url);
                 else {
-                    log.error("IMAGE_SERVICE ::::: show ::::: Unable to find Original Image at source.");
+                    log.error("IMAGE_SERVICE ::::: getImage ::::: Unable to find Original Image at source.");
                     throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_IMAGE_NOT_PRESENT_AT_SOURCE);
                 }
             }else {
-                log.debug("IMAGE_SERVICE ::::: show ::::: Found Original Image {} in S3 at {} ", imageRequestDto.getImageMetaData().getImageId(), original_Object_Url);
+                log.debug("IMAGE_SERVICE ::::: getImage ::::: Found Original Image {} in S3 at {} ", imageRequestDto.getImageMetaData().getImageId(), original_Object_Url);
             }
 
             //5. Optimise the fetched image from the source/s3
-            log.debug("IMAGE_SERVICE ::::: show ::::: Compressing the Original Image {} ", original_Object_Url);
-            s3_Optimised_Url = s3StoreRepo.optimise(ExternalImageDto.builder().s3ObjectUrl(original_Object_Url).imageRequestDto(imageRequestDto).build());
+            log.debug("IMAGE_SERVICE ::::: getImage ::::: Compressing the Original Image {} ", original_Object_Url);
+
+            optionalExternalImageResponseDto = s3StoreRepo.optimise(ExternalImageDto.builder().s3ObjectUrl(original_Object_Url).imageRequestDto(imageRequestDto).build());
+            if(optionalExternalImageResponseDto.isPresent()){
+                s3_Optimised_Url = optionalExternalImageResponseDto.get().getSourceImageUrl();
+            }
 
         } catch (ImageNotFoundException ex){
             throw new ImageNotFoundException(ex.getMessage());
         } catch (Exception ex){
-            log.error("IMAGE_SERVICE ::::: show ::::: System issues, Image not found. Try again later");
+            log.error("IMAGE_SERVICE ::::: getImage ::::: System issues, Image not found. Try again later");
             throw new GenericException(ImageServiceConstants.EXCEPTION_MESSAGE_GENERIC);
         }
 
         //5. Optimise the fetched image from the source and store in s3 storage.
-        log.debug("IMAGE_SERVICE ::::: show ::::: Saving Original Image {} in S3 at {} ", imageRequestDto.getImageMetaData().getImageId(), s3_Optimised_Url);
-        s3_Optimised_Url = s3StoreRepo.save(ExternalImageDto.builder().s3ObjectUrl(s3_Optimised_Url).imageRequestDto(imageRequestDto).build());
+        log.debug("IMAGE_SERVICE ::::: getImage ::::: Saving Original Image {} in S3 at {} ", imageRequestDto.getImageMetaData().getImageId(), s3_Optimised_Url);
+        optionalExternalImageResponseDto = s3StoreRepo.save(ExternalImageDto.builder().s3ObjectUrl(s3_Optimised_Url).imageRequestDto(imageRequestDto).build());
+        if(optionalExternalImageResponseDto.isPresent()){
+            s3_Optimised_Url = optionalExternalImageResponseDto.get().getSourceImageUrl();
+        }
 
         //6. Return the same optimised image back to the client.
-        log.info("IMAGE_SERVICE ::::: show ::::: Compressed image {} saved successfully, returning to the client", imageRequestDto.getImageMetaData().getImageId());
+        log.info("IMAGE_SERVICE ::::: getImage ::::: Compressed image {} saved successfully, returning to the client", imageRequestDto.getImageMetaData().getImageId());
         return ImageResponseDto.builder()
                 .s3BucketUrl(s3_Optimised_Url)
                 .build();
@@ -116,7 +132,7 @@ public class ImageServiceImpl implements ImageService{
 
     @Recover
     public ImageResponseDto recover(CustomS3Exception e, ImageRequestDto imageRequestDto){
-        log.error("IMAGE_SERVICE ::::: show ::::: Issue in connecting with external systems, quitting..");
+        log.error("IMAGE_SERVICE ::::: getImage ::::: Issue in connecting with external systems, quitting..");
         throw new ImageNotFoundException(ImageServiceConstants.EXCEPTION_MESSAGE_IMAGE_NOT_FOUND);
     }
 

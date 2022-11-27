@@ -16,7 +16,7 @@ public class SourceStoreRepoImpl implements SourceStoreRepo {
     @Override
     public String getOriginalImageFromSource(ExternalImageDto externalImageDto) {
         // Call to the external system to fetch from source [mocked_external_source]
-        return imageGatewayService.fetchImage(externalImageDto).getMockedResponse();
+        return imageGatewayService.fetchImage(externalImageDto).getSourceImageUrl();
 //        return "";
     }
 }

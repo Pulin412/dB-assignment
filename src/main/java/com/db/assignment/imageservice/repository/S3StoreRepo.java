@@ -2,16 +2,18 @@ package com.db.assignment.imageservice.repository;
 
 import com.db.assignment.imageservice.exception.CustomS3Exception;
 import com.db.assignment.imageservice.model.ExternalImageDto;
+import com.db.assignment.imageservice.model.ExternalImageResponseDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface S3StoreRepo {
 
-    String getOptimisedImageFromS3(ExternalImageDto externalImageDto);
+    Optional<ExternalImageResponseDto> getOptimisedImageFromS3(ExternalImageDto externalImageDto);
 
-    String getOriginalImageFromS3(ExternalImageDto externalImageDto);
+    Optional<ExternalImageResponseDto> getOriginalImageFromS3(ExternalImageDto externalImageDto);
 
-    String save(ExternalImageDto externalImageDto) throws CustomS3Exception;
+    Optional<ExternalImageResponseDto> save(ExternalImageDto externalImageDto) throws CustomS3Exception;
 
     boolean flushImage(ExternalImageDto externalImageDto);
 
@@ -19,5 +21,5 @@ public interface S3StoreRepo {
 
     boolean doesObjectExist(ExternalImageDto externalImageDto);
 
-    String optimise(ExternalImageDto externalImageDto);
+    Optional<ExternalImageResponseDto> optimise(ExternalImageDto externalImageDto);
 }

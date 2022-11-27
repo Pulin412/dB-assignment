@@ -13,6 +13,6 @@ public class ImageGatewayServiceImpl implements ImageGatewayService{
 
     @Override
     public ExternalImageResponseDto fetchImage(ExternalImageDto externalImageDto) {
-        return ExternalImageResponseDto.builder().mockedResponse(mock_response_getOriginalImageFromSource).build();
+        return ExternalImageResponseDto.builder().sourceImageUrl(mock_response_getOriginalImageFromSource).build();
     }
 }
