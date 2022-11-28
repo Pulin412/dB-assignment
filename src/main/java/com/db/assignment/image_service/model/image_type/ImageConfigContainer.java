@@ -5,10 +5,12 @@ import com.db.assignment.image_service.model.enums.ScaleTypeEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Builder
 @Getter
 @Setter
+@ToString
 public class ImageConfigContainer {
     private int height;
     private int width;

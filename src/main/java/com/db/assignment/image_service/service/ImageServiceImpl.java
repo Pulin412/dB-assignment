@@ -202,7 +202,7 @@ public class ImageServiceImpl implements ImageService{
         validateRequestInputs(imageRequestDto.getPreDefinedType(), imageRequestDto.getReference());
 
         imageRequestDto.setImageType(createImageType(imageRequestDto.getPreDefinedType()));
-        log.debug("IMAGE SERVICE :::::: validate :::::: Set predefined Image Type with details {} ", imageRequestDto.getImageType());
+        log.debug("IMAGE SERVICE :::::: validate :::::: Set predefined Image Type with details {} ", imageRequestDto.getImageType().getImageConfigContainer());
     }
 
     private ImageType createImageType(String imageType){
