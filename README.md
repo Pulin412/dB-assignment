@@ -196,5 +196,5 @@ Flush Image -
 ## Improvements
 - DynamoDB (key value database)/ Cassandra DB (Distributed NoSql) to store images metadata.
 - Key generation service to generate image IDs for sharded database.
-- Introduce a _Least Recently Used_ based Memcached cache with 80-20% rule i.e. 20% of daily read volume is generating 80% of the incoming traffic.
+- Introduce a _Least Recently Used_ cache with 80-20% rule i.e. 20% of daily read volume is generating 80% of the incoming traffic.
 - Isolate reads with writes. Implement queue based solution for writes if Consistency can take a hit instead of Availability.
